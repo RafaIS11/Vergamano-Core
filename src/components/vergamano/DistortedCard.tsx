@@ -97,13 +97,13 @@ export const DistortedCard: React.FC<DistortedCardProps> = ({
         `}
         style={{
           transform: `skew(${skewValues.x}deg, ${skewValues.y}deg)`,
-          clipPath: isHovered 
+          clipPath: isHovered
             ? 'polygon(2% 0%, 98% 2%, 100% 98%, 0% 100%)'
             : 'polygon(0% 1%, 100% 0%, 99% 100%, 1% 99%)'
         }}
       >
         {/* Secondary Border Effect */}
-        <div 
+        <div
           className="absolute inset-0 border-2 border-black opacity-20 pointer-events-none"
           style={{ transform: 'translate(4px, 4px)' }}
         />
@@ -191,7 +191,7 @@ export const MetricCard: React.FC<{
     `}>
       {/* Grain Texture */}
       <div className="absolute inset-0 grain-texture pointer-events-none opacity-30" />
-      
+
       <div className="relative z-10">
         <p className="font-helvetica text-[10px] font-black uppercase tracking-widest mb-2 crossed-out-steep">
           {label}
@@ -260,7 +260,7 @@ export const AlertCard: React.FC<{
       {(level === 'high' || level === 'critical') && (
         <div className="absolute -top-3 right-10 w-16 h-8">
           <svg viewBox="0 0 60 30" className="w-full h-full">
-            <path d="M5 25 L15 5 M10 25 L20 8" stroke="#000000" strokeWidth="2" fill="none" opacity="0.6"/>
+            <path d="M5 25 L15 5 M10 25 L20 8" stroke="#000000" strokeWidth="2" fill="none" opacity="0.6" />
           </svg>
         </div>
       )}

@@ -20,9 +20,9 @@ export const BasquiatCrown: React.FC<{ className?: string }> = ({ className = ''
 );
 
 // Hand-drawn Arrow
-export const HandArrow: React.FC<{ direction?: 'left' | 'right' | 'up' | 'down'; className?: string }> = ({ 
-  direction = 'right', 
-  className = '' 
+export const HandArrow: React.FC<{ direction?: 'left' | 'right' | 'up' | 'down'; className?: string }> = ({
+  direction = 'right',
+  className = ''
 }) => {
   const rotations = {
     right: 0,
@@ -30,10 +30,10 @@ export const HandArrow: React.FC<{ direction?: 'left' | 'right' | 'up' | 'down';
     left: 180,
     up: 270
   };
-  
+
   return (
-    <svg 
-      viewBox="0 0 60 30" 
+    <svg
+      viewBox="0 0 60 30"
       className={`${className}`}
       style={{ transform: `rotate(${rotations[direction]}deg)`, overflow: 'visible' }}
     >
@@ -109,9 +109,9 @@ export const CrossOut: React.FC<{ className?: string }> = ({ className = '' }) =
 );
 
 // Ink Splatter SVG Component
-export const InkSplatterSVG: React.FC<{ className?: string; variant?: 1 | 2 }> = ({ 
-  className = '', 
-  variant = 1 
+export const InkSplatterSVG: React.FC<{ className?: string; variant?: 1 | 2 }> = ({
+  className = '',
+  variant = 1
 }) => {
   const splatters = {
     1: (
@@ -152,7 +152,7 @@ export const InkSplatterSVG: React.FC<{ className?: string; variant?: 1 | 2 }> =
       </>
     )
   };
-  
+
   return (
     <svg viewBox="0 0 100 100" className={`${className}`} style={{ overflow: 'visible' }}>
       {splatters[variant]}
@@ -207,12 +207,12 @@ export const ScratchMarks: React.FC<{ className?: string }> = ({ className = '' 
 );
 
 // Chaotic Underline
-export const ChaoticUnderline: React.FC<{ className?: string; width?: number }> = ({ 
+export const ChaoticUnderline: React.FC<{ className?: string; width?: number }> = ({
   className = '',
-  width = 100 
+  width = 100
 }) => (
-  <svg 
-    viewBox={`0 0 ${width} 12`} 
+  <svg
+    viewBox={`0 0 ${width} 12`}
     className={`${className}`}
     style={{ overflow: 'visible', width: `${width}px` }}
   >
@@ -250,3 +250,82 @@ export const DataStream: React.FC<{ className?: string }> = ({ className = '' })
     ))}
   </svg>
 );
+
+// NEW: Digital Charcoal Stroke
+export const CharcoalStroke: React.FC<{ className?: string; rotation?: number }> = ({
+  className = '',
+  rotation = 0
+}) => (
+  <svg
+    viewBox="0 0 200 50"
+    className={`${className}`}
+    style={{ transform: `rotate(${rotation}deg)`, overflow: 'visible' }}
+  >
+    <filter id="displacementFilter">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turbulence" />
+      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="5" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <path
+      d="M10 25 Q50 10, 100 25 T190 25"
+      stroke="#000000"
+      strokeWidth="15"
+      fill="none"
+      strokeLinecap="round"
+      opacity="0.8"
+      filter="url(#displacementFilter)"
+    />
+    <path
+      d="M15 25 Q55 15, 95 25 T185 25"
+      stroke="#000000"
+      strokeWidth="8"
+      fill="none"
+      strokeLinecap="round"
+      opacity="0.6"
+    />
+  </svg>
+);
+
+// NEW: The Void Scratch
+export const VoidScratch: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg viewBox="0 0 100 100" className={`${className}`} style={{ overflow: 'visible' }}>
+    <path
+      d="M10 10 L90 90 M90 10 L10 90 M50 0 L50 100 M0 50 L100 50"
+      stroke="#000000"
+      strokeWidth="2"
+      fill="none"
+      opacity="0.9"
+    />
+    <circle cx="50" cy="50" r="40" stroke="#000000" strokeWidth="4" fill="none" />
+    <circle cx="50" cy="50" r="25" stroke="#000000" strokeWidth="8" fill="none" opacity="0.3" />
+  </svg>
+);
+
+// NEW: Aggressive Arrow
+export const AggressiveArrow: React.FC<{ direction?: 'left' | 'right' | 'up' | 'down'; className?: string }> = ({
+  direction = 'right',
+  className = ''
+}) => {
+  const rotations = {
+    right: 0,
+    down: 90,
+    left: 180,
+    up: 270
+  };
+
+  return (
+    <svg
+      viewBox="0 0 100 40"
+      className={`${className}`}
+      style={{ transform: `rotate(${rotations[direction]}deg)`, overflow: 'visible' }}
+    >
+      <path
+        d="M0 20 H80 M60 5 L90 20 L60 35"
+        stroke="#000000"
+        strokeWidth="6"
+        fill="none"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+};
