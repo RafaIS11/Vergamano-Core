@@ -11,6 +11,7 @@ import {
   DataStream
 } from './components/vergamano/ScribbleElements';
 import { DistortedCard, MetricCard, AlertCard } from './components/vergamano/DistortedCard';
+import { supabase } from './lib/supabase';
 
 // ----- UTILITY COMPONENTS -----
 
@@ -89,23 +90,76 @@ const GlitchNumber: React.FC<{ value: string; className?: string }> = ({ value, 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // ISOLATED XP STATE (Prepared for Supabase/n8n)
-  const [xpState] = useState({
-    architect: 1250,
-    spartan: 840,
-    mercenary: 3200,
-    nomad: 450,
-    ghost: 9999
+  // ISOLATED XP STATE (Syncing with Supabase)
+  const [xpState, setXpState] = useState({
+    architect: 0,
+    spartan: 0,
+    mercenary: 0,
+    nomad: 0,
+    ghost: 0
   });
 
   const [scanLine, setScanLine] = useState(0);
 
   useEffect(() => {
+    console.log('App: Initializing Supabase synchronization...');
+
+    // 1. Initial Fetch
+    const fetchXP = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profile')
+          .select('*')
+          .limit(1)
+          .single();
+
+        if (data && !error) {
+          console.log('App: XP state fetched successfully');
+          setXpState({
+            architect: data.xp_architect || 0,
+            spartan: data.xp_spartan || 0,
+            mercenary: data.xp_mercenary || 0,
+            nomad: data.xp_nomad || 0,
+            ghost: data.xp_ghost || 0
+          });
+        } else if (error) {
+          console.warn('App: Supabase fetch error (expected if table empty):', error.message);
+        }
+      } catch (err) {
+        console.error('App: Critical error in fetchXP:', err);
+      }
+    };
+
+    fetchXP();
+
+    // 2. Realtime Subscription
+    const channel = supabase
+      .channel('profile_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profile' },
+        (payload: any) => {
+          if (payload.new) {
+            console.log('App: Realtime update received', payload.new);
+            setXpState({
+              architect: payload.new.xp_architect || 0,
+              spartan: payload.new.xp_spartan || 0,
+              mercenary: payload.new.xp_mercenary || 0,
+              nomad: payload.new.xp_nomad || 0,
+              ghost: payload.new.xp_ghost || 0
+            });
+          }
+        }
+      )
+      .subscribe();
+
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
     const scanInterval = setInterval(() => setScanLine(prev => (prev + 1) % 100), 50);
+
     return () => {
       clearInterval(timeInterval);
       clearInterval(scanInterval);
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -116,11 +170,11 @@ function App() {
   ];
 
   const pillars = [
-    { id: 'architect', title: 'ARCHITECT', xp: xpState.architect, rotate: '-2deg', skew: 'skew-x-2' },
-    { id: 'spartan', title: 'SPARTAN', xp: xpState.spartan, rotate: '1deg', skew: 'skew-y-1' },
-    { id: 'mercenary', title: 'MERCENARY', xp: xpState.mercenary, rotate: '-3deg', skew: '-skew-x-3' },
-    { id: 'nomad', title: 'NOMAD', xp: xpState.nomad, rotate: '2deg', skew: 'skew-y-2' },
-    { id: 'ghost', title: 'GHOST', xp: xpState.ghost, rotate: '0deg', skew: 'skew-x-1' },
+    { id: 'architect', title: 'ARCHITECT', xp: xpState.architect, rotate: 'rotate-[-2deg]', skew: 'skew-x-2' },
+    { id: 'spartan', title: 'SPARTAN', xp: xpState.spartan, rotate: 'rotate-[1deg]', skew: 'skew-y-1' },
+    { id: 'mercenary', title: 'MERCENARY', xp: xpState.mercenary, rotate: 'rotate-[-3deg]', skew: '-skew-x-3' },
+    { id: 'nomad', title: 'NOMAD', xp: xpState.nomad, rotate: 'rotate-[2deg]', skew: 'skew-y-2' },
+    { id: 'ghost', title: 'GHOST', xp: xpState.ghost, rotate: 'rotate-[0deg]', skew: 'skew-x-1' },
   ];
 
   return (
