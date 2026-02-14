@@ -99,6 +99,23 @@ function App() {
     ghost: 0
   });
 
+  const [activeMission, setActiveMission] = useState<string | null>(null);
+
+  const selectMission = (id: string) => {
+    console.log(`Mission Selected: ${id}`);
+    setActiveMission(id);
+  };
+
+  const completeStep = async () => {
+    if (!activeMission) return;
+    const newXP = xpState[activeMission as keyof typeof xpState] + 10;
+    
+    setXpState(prev => ({ ...prev, [activeMission]: newXP }));
+    
+    // Direct Update to Supabase
+    await supabase.from('profile').update({ [`xp_${activeMission}`]: newXP }).eq('id', 'rafael'); 
+  };
+
   const [scanLine, setScanLine] = useState(0);
 
   useEffect(() => {
@@ -298,37 +315,58 @@ function App() {
           </div>
 
           {/* PILLARS GRID */}
-          <div className="grid grid-cols-1 gap-12 relative z-10 px-4">
-            {pillars.map((pillar) => (
-              <DistortedCard
-                key={pillar.id}
-                title={pillar.title}
-                className={`transform transition-transform hover:scale-105 hover:z-20 ${pillar.skew} ${pillar.rotate}`}
-                arrowDirection="right"
-                showArrow={true}
-                scribbleIntensity={Math.random() > 0.5 ? 'high' : 'medium'}
-              >
-                {/* We pass the value as children to use our GlitchNumber component */}
-                <div className="flex items-end justify-between mt-4">
-                  <div className="font-courier text-xs opacity-60">XP_ACCUMULATION</div>
-                  <div className="font-courier text-4xl font-bold">
-                    <GlitchNumber value={pillar.xp.toString()} />
+          {!activeMission ? (
+            <div className="flex flex-col items-center justify-center h-full border-4 border-dashed border-black p-12 bg-gray-50">
+              <h2 className="text-4xl font-black mb-8">SELECT YOUR FOCUS</h2>
+              <div className="grid grid-cols-1 gap-4 w-full">
+                {pillars.map(p => (
+                  <button 
+                    key={p.id}
+                    onClick={() => selectMission(p.id)}
+                    className="border-4 border-black p-4 text-2xl font-black hover:bg-black hover:text-white transition-all uppercase"
+                  >
+                    Activate {p.id}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-12 relative z-10 px-4">
+              <div className="bg-black text-white p-6 mb-8 transform -rotate-1">
+                <h3 className="text-2xl font-black">ACTIVE MISSION: {activeMission.toUpperCase()}</h3>
+                <button 
+                  onClick={completeStep}
+                  className="mt-4 bg-white text-black px-6 py-2 font-black hover:bg-red-500 hover:text-white"
+                >
+                  +10 XP PROGRESS
+                </button>
+                <button 
+                  onClick={() => setActiveMission(null)}
+                  className="ml-4 text-xs underline"
+                >
+                  ABORT
+                </button>
+              </div>
+              {/* Filtered Pillar */}
+              {pillars.filter(p => p.id === activeMission).map((pillar) => (
+                <DistortedCard
+                  key={pillar.id}
+                  title={pillar.title}
+                  className={`transform transition-transform scale-110 ${pillar.skew} ${pillar.rotate}`}
+                  arrowDirection="right"
+                  showArrow={true}
+                  scribbleIntensity="high"
+                >
+                  <div className="flex items-end justify-between mt-4">
+                    <div className="font-courier text-xs opacity-60">XP_ACCUMULATION</div>
+                    <div className="font-courier text-4xl font-bold">
+                      <GlitchNumber value={pillar.xp.toString()} />
+                    </div>
                   </div>
-                </div>
-
-                {/* Random Void Scratch on some cards */}
-                {Math.random() > 0.6 && (
-                  <div className="absolute inset-0 pointer-events-none opacity-40">
-                    <VoidScratch className="w-full h-full text-black" />
-                  </div>
-                )}
-                {/* Charcoal Stroke */}
-                <div className="absolute -bottom-4 left-0 w-full opacity-80 pointer-events-none">
-                  <CharcoalStroke />
-                </div>
-              </DistortedCard>
-            ))}
-          </div>
+                </DistortedCard>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* RIGHT PANEL: PSYCH-TELEMETRY */}
