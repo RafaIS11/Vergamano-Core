@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
+import { LSDFeed } from './components/vergamano/LSDFeed';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [xpState, setXpState] = useState({
     architect: 0, spartan: 0, mercenary: 0, nomad: 0, ghost: 0
   });
+  const [activeTab, setActiveTab] = useState<'status' | 'lsd'>('status');
   const [activePower, setActivePower] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,40 +62,65 @@ function App() {
         <h1 className="text-8xl font-black tracking-tighter">VERGAMANO</h1>
         <div className="text-right">
           <p className="text-4xl font-black">{currentTime.toLocaleTimeString()}</p>
-          <p className="text-sm font-bold bg-black text-white px-2">CORE_OS_ACTIVE</p>
+          <p className="text-sm font-bold bg-black text-white px-2">MOLTBOT_REALTIME_ACTIVE</p>
         </div>
       </header>
 
+      <nav className="border-b-[10px] border-black flex">
+        <button 
+          onClick={() => setActiveTab('status')}
+          className={`px-12 py-4 text-2xl font-black border-r-8 border-black ${activeTab === 'status' ? 'bg-black text-white' : 'bg-white'}`}
+        >
+          ARENA_STATUS
+        </button>
+        <button 
+          onClick={() => setActiveTab('lsd')}
+          className={`px-12 py-4 text-2xl font-black border-r-8 border-black ${activeTab === 'lsd' ? 'bg-black text-white' : 'bg-white'}`}
+        >
+          LSD_FEED
+        </button>
+      </nav>
+
       <main className="grid grid-cols-12 min-h-screen">
         <aside className="col-span-3 border-r-[10px] border-black p-8">
-          <h2 className="text-4xl font-black mb-6 underline decoration-8">STATUS</h2>
-          <div className="border-4 border-black p-4 bg-black text-white">
-            <p className="text-xs font-bold uppercase">Focus</p>
-            <p className="text-2xl font-black italic">{activePower || 'NONE'}</p>
+          <h2 className="text-4xl font-black mb-6 underline decoration-8">SISTEMA</h2>
+          <div className="border-4 border-black p-4 bg-black text-white mb-8">
+            <p className="text-xs font-bold uppercase">Estado</p>
+            <p className="text-2xl font-black italic">CONECTADO_ACTIVO</p>
+          </div>
+          <div className="border-4 border-black p-4">
+            <p className="text-xs font-bold uppercase">Ubicación</p>
+            <p className="text-xl font-bold">MADRID_SECTOR_01</p>
           </div>
         </aside>
 
-        <section className="col-span-9 p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {powers.map((power) => (
-            <div 
-              key={power.id}
-              onClick={() => setActivePower(power.id)}
-              className={`border-[8px] border-black p-6 cursor-pointer ${activePower === power.id ? 'bg-black text-white' : 'bg-white'}`}
-            >
-              <h3 className="text-5xl font-black uppercase">{power.title}</h3>
-              <div className="flex justify-between items-end mt-12">
-                <span className="text-6xl font-black italic">{power.xp} XP</span>
-              </div>
-              {activePower === power.id && (
-                <button 
-                  onClick={(e) => { e.stopPropagation(); triggerAction(power.id); }}
-                  className="w-full mt-6 bg-red-600 text-white p-4 font-black text-2xl border-4 border-white"
+        <section className="col-span-9 p-8">
+          {activeTab === 'status' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {powers.map((power) => (
+                <div 
+                  key={power.id}
+                  onClick={() => setActivePower(power.id)}
+                  className={`border-[8px] border-black p-6 cursor-pointer ${activePower === power.id ? 'bg-black text-white' : 'bg-white'}`}
                 >
-                  PUSH_PROGRESS (+10)
-                </button>
-              )}
+                  <h3 className="text-5xl font-black uppercase">{power.title}</h3>
+                  <div className="flex justify-between items-end mt-12">
+                    <span className="text-6xl font-black italic">{power.xp} XP</span>
+                  </div>
+                  {activePower === power.id && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); triggerAction(power.id); }}
+                      className="w-full mt-6 bg-red-600 text-white p-4 font-black text-2xl border-4 border-white"
+                    >
+                      MAX_SKILL_UP (+10)
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <LSDFeed />
+          )}
         </section>
       </main>
     </div>
