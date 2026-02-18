@@ -1,127 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { LSDFeed } from './components/vergamano/LSDFeed';
+import { ArenaView } from './components/vergamano/ArenaView';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [xpState, setXpState] = useState({
-    architect: 0, spartan: 0, mercenary: 0, nomad: 0, ghost: 0
-  });
-  const [activeTab, setActiveTab] = useState<'status' | 'lsd'>('status');
-  const [activePower, setActivePower] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'arena' | 'lsd' | 'map'>('arena');
 
   useEffect(() => {
-    const fetchXP = async () => {
+    const fetchProfile = async () => {
       const { data } = await supabase.from('profile').select('*').single();
-      if (data) {
-        setXpState({
-          architect: data.xp_architect || 0,
-          spartan: data.xp_spartan || 0,
-          mercenary: data.xp_mercenary || 0,
-          nomad: data.xp_nomad || 0,
-          ghost: data.xp_ghost || 0
-        });
-      }
+      if (data) setProfile(data);
     };
-    fetchXP();
+    fetchProfile();
 
-    const channel = supabase.channel('profile_changes')
+    const channel = supabase.channel('profile_sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profile' }, 
-      (payload: any) => {
-        if (payload.new) {
-          setXpState({
-            architect: payload.new.xp_architect || 0,
-            spartan: payload.new.xp_spartan || 0,
-            mercenary: payload.new.xp_mercenary || 0,
-            nomad: payload.new.xp_nomad || 0,
-            ghost: payload.new.xp_ghost || 0
-          });
-        }
+      (payload) => {
+        setProfile(payload.new);
       }).subscribe();
 
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => { clearInterval(timeInterval); supabase.removeChannel(channel); };
   }, []);
 
-  const triggerAction = async (power: string) => {
-    const currentXP = xpState[power as keyof typeof xpState];
-    await supabase.from('profile').update({ [`xp_${power}`]: currentXP + 10 }).eq('id', 'rafael');
-  };
-
-  const powers = [
-    { id: 'architect', title: 'ARCHITECT', xp: xpState.architect },
-    { id: 'spartan', title: 'SPARTAN', xp: xpState.spartan },
-    { id: 'mercenary', title: 'MERCENARY', xp: xpState.mercenary },
-    { id: 'nomad', title: 'NOMAD', xp: xpState.nomad },
-    { id: 'ghost', title: 'GHOST', xp: xpState.ghost },
-  ];
-
   return (
-    <div className="min-h-screen bg-white text-black font-mono p-0">
-      <header className="border-b-[10px] border-black p-8 flex justify-between items-center">
-        <h1 className="text-8xl font-black tracking-tighter">VERGAMANO</h1>
-        <div className="text-right">
-          <p className="text-4xl font-black">{currentTime.toLocaleTimeString()}</p>
-          <p className="text-sm font-bold bg-black text-white px-2">MOLTBOT_REALTIME_ACTIVE</p>
+    <div className="min-h-screen bg-white text-black font-mono p-0 overflow-x-hidden">
+      {/* HEADER BRUTALISTA */}
+      <header className="border-b-[10px] border-black p-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-8xl font-black tracking-tighter leading-none">VERGA<br/>MANO_HUD</h1>
+          <p className="text-xs font-bold mt-2">V3.5_LIFE_CLIENT</p>
+        </div>
+        <div className="text-right flex flex-col items-end gap-2">
+          <div className="flex gap-4">
+            <div className="text-right border-r-4 border-black pr-4">
+              <p className="text-xs font-bold uppercase">Biometría</p>
+              <p className={`text-4xl font-black ${profile?.hp < 30 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
+                {profile?.hp < 30 ? 'CRÍTICA' : 'ESTABLE'}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-4xl font-black">{currentTime.toLocaleTimeString([], {hour12: false})}</p>
+              <p className="text-sm font-bold bg-black text-white px-2">WED 18 FEB 2026</p>
+            </div>
+          </div>
         </div>
       </header>
 
-      <nav className="border-b-[10px] border-black flex">
-        <button 
-          onClick={() => setActiveTab('status')}
-          className={`px-12 py-4 text-2xl font-black border-r-8 border-black ${activeTab === 'status' ? 'bg-black text-white' : 'bg-white'}`}
-        >
-          ARENA_STATUS
-        </button>
-        <button 
-          onClick={() => setActiveTab('lsd')}
-          className={`px-12 py-4 text-2xl font-black border-r-8 border-black ${activeTab === 'lsd' ? 'bg-black text-white' : 'bg-white'}`}
-        >
-          LSD_FEED
-        </button>
+      {/* NAV SECUNDARIO */}
+      <nav className="border-b-[10px] border-black flex flex-wrap">
+        {[
+          { id: 'arena', label: 'ARENA' },
+          { id: 'map', label: 'MAPA' },
+          { id: 'enlace', label: 'ENLACE' },
+          { id: 'lsd', label: 'LSD_FEED' },
+          { id: 'mercado', label: 'MERCADO' }
+        ].map(tab => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-8 py-6 text-3xl font-black border-r-8 border-black transition-all ${activeTab === tab.id ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </nav>
 
+      {/* MAIN CONTENT AREA */}
       <main className="grid grid-cols-12 min-h-screen">
-        <aside className="col-span-3 border-r-[10px] border-black p-8">
-          <h2 className="text-4xl font-black mb-6 underline decoration-8">SISTEMA</h2>
-          <div className="border-4 border-black p-4 bg-black text-white mb-8">
-            <p className="text-xs font-bold uppercase">Estado</p>
-            <p className="text-2xl font-black italic">CONECTADO_ACTIVO</p>
-          </div>
-          <div className="border-4 border-black p-4">
-            <p className="text-xs font-bold uppercase">Ubicación</p>
-            <p className="text-xl font-bold">MADRID_SECTOR_01</p>
-          </div>
-        </aside>
-
-        <section className="col-span-9 p-8">
-          {activeTab === 'status' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {powers.map((power) => (
-                <div 
-                  key={power.id}
-                  onClick={() => setActivePower(power.id)}
-                  className={`border-[8px] border-black p-6 cursor-pointer ${activePower === power.id ? 'bg-black text-white' : 'bg-white'}`}
-                >
-                  <h3 className="text-5xl font-black uppercase">{power.title}</h3>
-                  <div className="flex justify-between items-end mt-12">
-                    <span className="text-6xl font-black italic">{power.xp} XP</span>
-                  </div>
-                  {activePower === power.id && (
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); triggerAction(power.id); }}
-                      className="w-full mt-6 bg-red-600 text-white p-4 font-black text-2xl border-4 border-white"
-                    >
-                      MAX_SKILL_UP (+10)
-                    </button>
-                  )}
-                </div>
-              ))}
+        <section className="col-span-12 lg:col-span-9 p-12 border-r-[10px] border-black">
+          {activeTab === 'lsd' && <LSDFeed />}
+          {activeTab === 'arena' && <ArenaView />}
+          {activeTab === 'map' && (
+            <div className="text-center p-20 border-8 border-dashed border-black">
+              <h2 className="text-6xl font-black">[MAPA_BLOQUEADO]</h2>
+              <p className="text-xl font-bold mt-4">NECESITAS LVL 5 EN NOMAD PARA EXPLORAR OTROS SECTORES</p>
             </div>
-          ) : (
-            <LSDFeed />
           )}
         </section>
+
+        {/* SIDEBAR DE STATS */}
+        <aside className="col-span-12 lg:col-span-3 p-8 bg-white space-y-8">
+          <div className="space-y-2">
+            <p className="text-xs font-bold uppercase italic">Energía_Vital</p>
+            <div className="flex gap-1">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className={`h-8 w-full border-2 border-black ${i < (profile?.hp / 10) ? 'bg-black' : 'bg-transparent'}`} />
+              ))}
+            </div>
+          </div>
+
+          <div className="border-8 border-black p-4 space-y-4">
+            <div className="flex justify-between items-end border-b-2 border-black pb-2">
+              <span className="text-xs font-bold uppercase">Divisa_Económica</span>
+              <span className="text-3xl font-black">{profile?.streak_days * 10 || 0} CR</span>
+            </div>
+            <div className="flex justify-between items-end">
+              <span className="text-xs font-bold uppercase">Localización</span>
+              <span className="text-xl font-black uppercase">Madrid_Sector_01</span>
+            </div>
+          </div>
+
+          {/* AVATAR STATE */}
+          <div className="border-[10px] border-black p-6 bg-black text-white text-center">
+            <p className="text-xs font-bold uppercase mb-4">Moltbot_Realtime</p>
+            <p className="text-2xl font-black uppercase italic tracking-widest text-green-400">Conectado_Activo</p>
+            <div className="mt-8 opacity-20 text-6xl">👤</div>
+          </div>
+        </aside>
       </main>
     </div>
   );
