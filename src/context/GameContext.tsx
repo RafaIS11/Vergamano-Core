@@ -20,6 +20,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<Profile | null>(null);
     const [missions, setMissions] = useState<Mission[]>([]);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [feedItems, setFeedItems] = useState<any[]>([]);
     const [activeModule, setActiveModule] = useState<ModuleType>('arena');
     const [isBunkerMode, setBunkerMode] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -50,6 +51,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq('user_id', USER_ID)
                 .order('created_at', { ascending: true });
             if (msgData) setChatMessages(msgData as ChatMessage[]);
+
+            // Feed
+            const { data: feedData } = await supabase
+                .from('content_feed')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (feedData) setFeedItems(feedData);
 
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -96,7 +104,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             )
             .subscribe();
 
-        // FALLBACK: Polling cada 5 segundos si falla el Realtime
+        const feedSub = supabase.channel('feed_realtime')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'content_feed' },
+                (payload) => {
+                    setFeedItems(prev => [payload.new, ...prev]);
+                }
+            )
+            .subscribe();
+
+        // FALLBACK: Polling cada 10 segundos para perfil y feed
         const pollingInterval = setInterval(async () => {
             const { data } = await supabase
                 .from('chat_messages')
@@ -106,19 +124,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data) {
                 setChatMessages(prev => {
-                    // Solo actualizamos si hay mensajes nuevos que no tenemos
-                    if (data.length > prev.length) {
-                        return data as ChatMessage[];
-                    }
+                    if (data.length > prev.length) return data as ChatMessage[];
                     return prev;
                 });
             }
-        }, 5000);
+
+            // Polling para el Feed
+            const { data: feedData } = await supabase
+                .from('content_feed')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (feedData) setFeedItems(feedData);
+
+        }, 10000);
 
         return () => {
             supabase.removeChannel(profileSub);
             supabase.removeChannel(tasksSub);
             supabase.removeChannel(chatSub);
+            supabase.removeChannel(feedSub);
             clearInterval(pollingInterval);
         };
     }, [fetchInitialData]);
@@ -162,7 +186,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         missions,
         cities: [],
         chatMessages,
-        feedItems: [],
+        feedItems,
         activeModule,
         isBunkerMode,
         isLoading,
