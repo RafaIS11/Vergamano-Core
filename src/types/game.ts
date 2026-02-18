@@ -3,47 +3,40 @@ export type ModuleType = 'arena' | 'map' | 'neural' | 'lsd' | 'market';
 
 export interface Mission {
     id: string;
+    user_id: string;
     title: string;
+    description?: string;
+    pilar: 'work' | 'nomad' | 'body';
     xp_reward: number;
-    status: 'pending' | 'pending_audit' | 'completed' | 'failed';
-    proof_url?: string;
-    category: 'architect' | 'spartan' | 'mercenary' | 'nomad' | 'ghost';
+    status: 'pending' | 'active' | 'auditing' | 'completed';
+    evidence_url?: string;
+    started_at?: string;
+    created_at: string;
 }
 
 export interface City {
-    id: string;
     name: string;
-    status: 'locked' | 'current' | 'review' | 'completed';
-    required_xp: number;
-    proof_url?: string;
-    index: number;
-}
-
-export interface FeedItem {
-    id: string;
-    title: string;
-    url: string;
-    category: 'AIRDROP' | 'SPARTAN' | 'ARCHITECT';
-    consumed: boolean;
+    xp_needed: number;
+    status: string;
 }
 
 export interface ChatMessage {
     id: string;
-    sender: 'moltbot' | 'user';
-    message: string;
-    timestamp: string;
+    user_id: string;
+    content: string;
+    sender: 'rafael' | 'moltbot';
+    created_at: string;
 }
 
 export interface Profile {
     id: string;
     hp: number;
     credits: number;
-    xp_architect: number;
-    xp_spartan: number;
-    xp_mercenary: number;
+    xp_work: number;
     xp_nomad: number;
-    xp_ghost: number;
-    avatar_state: string;
+    xp_body: number;
+    level: number;
+    status: string;
 }
 
 export interface GameState {
@@ -51,10 +44,8 @@ export interface GameState {
     missions: Mission[];
     cities: City[];
     chatMessages: ChatMessage[];
-    feedItems: FeedItem[];
+    feedItems: any[];
     activeModule: ModuleType;
     isBunkerMode: boolean;
-    isBriefingCompleted: boolean;
     isLoading: boolean;
-    error: string | null;
 }

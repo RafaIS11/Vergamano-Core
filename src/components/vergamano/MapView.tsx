@@ -1,79 +1,97 @@
 
 import React from 'react';
 import { useGame } from '../../context/GameContext';
-import { Lock, MapPin, CheckCircle2 } from 'lucide-react';
-import { ChaoticScribble, AggressiveArrow } from './ScribbleElements';
 
 const CITIES = [
-    'Caracas', 'Madrid', 'Bruselas', 'Berlín', 'Copenhague',
-    'Bali', 'Oslo', 'San Francisco', 'Londres', 'Nueva York'
+    { name: 'CARACAS', xp_needed: 0, status: 'Conquistada' },
+    { name: 'MADRID', xp_needed: 500, status: 'Objetivo Actual' },
+    { name: 'BRUSELAS', xp_needed: 2000, status: 'Bloqueada' },
+    { name: 'BERLÍN', xp_needed: 5000, status: 'Bloqueada' },
+    { name: 'TOKIO', xp_needed: 10000, status: 'Bloqueada' },
+    { name: 'NUEVA YORK', xp_needed: 20000, status: 'Bloqueada' },
+    { name: 'LONDRES', xp_needed: 35000, status: 'Bloqueada' },
+    { name: 'PARÍS', xp_needed: 50000, status: 'Bloqueada' },
+    { name: 'DUBÁI', xp_needed: 75000, status: 'Bloqueada' },
+    { name: 'SINGAPUR', xp_needed: 100000, status: 'Bloqueada' }
 ];
 
 const MapView: React.FC = () => {
-    const { } = useGame();
-    const currentCityIndex = 1; // Testing value: Madrid
+    const { profile } = useGame();
+    const currentXP = profile?.xp_nomad || 0;
 
     return (
-        <div className="p-12 relative min-h-screen bg-white">
-            <div className="absolute top-20 right-20 w-64 h-64 opacity-10">
-                <ChaoticScribble />
-            </div>
+        <div className="py-20 flex flex-col items-center relative">
+            <h2 className="text-7xl font-black italic mb-20 border-b-8 border-black w-full text-center pb-8">
+                MAPA_DE_CONQUISTA
+            </h2>
 
-            <h2 className="text-6xl font-black mb-12 uppercase tracking-tighter">MAPA_DE_CONQUISTA</h2>
+            {/* Línea Central Brutalista */}
+            <div className="absolute top-48 bottom-0 w-2 bg-black left-1/2 -translate-x-1/2 z-0" />
 
-            <div className="relative flex flex-col gap-12 max-w-2xl">
+            <div className="flex flex-col gap-32 relative z-10 w-full max-w-4xl">
                 {CITIES.map((city, index) => {
-                    const isCompleted = index < currentCityIndex;
-                    const isActive = index === currentCityIndex;
-                    const isLocked = index > currentCityIndex;
+                    const isLocked = currentXP < city.xp_needed;
+                    const isCompleted = index === 0; // Solo para demostración
 
                     return (
-                        <div key={city} className="flex items-center gap-8 relative group">
-                            {/* Connector Line */}
-                            {index !== CITIES.length - 1 && (
-                                <div className={`absolute left-8 top-16 w-2 h-16 border-l-[6px] border-black border-dashed opacity-30
-                   ${isCompleted ? 'border-solid opacity-100' : ''}`} />
-                            )}
+                        <div key={city.name} className={`flex items-center gap-12 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
 
-                            {/* City Node */}
-                            <div className={`relative w-16 h-16 border-[8px] border-black flex items-center justify-center transition-all duration-300
-                ${isCompleted ? 'bg-black text-white' : 'bg-white text-black'}
-                ${isActive ? 'scale-125 z-10 shadow-[0_0_30px_rgba(0,0,0,0.2)]' : ''}
-                ${isLocked ? 'opacity-30' : ''}`}>
+                            <div className="flex-1 flex flex-col items-center">
+                                <div className={`vergamano-border-thick p-8 bg-white vergamano-shadow-large relative w-full
+                                  ${isLocked ? 'opacity-50' : ''}`}>
 
-                                {isCompleted ? <CheckCircle2 size={32} /> :
-                                    isActive ? <MapPin size={32} className="animate-bounce" /> :
-                                        <Lock size={24} />}
-                            </div>
+                                    <h3 className="text-4xl font-black italic">{city.name}</h3>
+                                    <span className="font-bold text-sm block mt-2 opacity-60">REQUISITO: {city.xp_needed} XP_NOMAD</span>
 
-                            {/* City Name */}
-                            <div className="flex flex-col">
-                                <span className={`text-4xl font-black uppercase tracking-tighter transition-all
-                  ${isLocked ? 'opacity-20 line-through' : ''}
-                  ${isActive ? 'text-[#FF1A1A]' : ''}`}>
-                                    {city}
-                                </span>
-                                {isActive && (
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="bg-black text-white px-2 py-0.5 font-courier text-xs uppercase">OBJETIVO ACTUAL</span>
-                                        <div className="w-12 h-4">
-                                            <AggressiveArrow direction="right" />
+                                    {/* Efecto de Spray Negro para ciudades bloqueadas */}
+                                    {isLocked && (
+                                        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center p-4">
+                                            <svg viewBox="0 0 200 100" className="w-full h-full opacity-90">
+                                                <path
+                                                    d="M10,50 Q40,10 80,60 T150,40 T190,80"
+                                                    fill="none"
+                                                    stroke="black"
+                                                    strokeWidth="25"
+                                                    strokeLinecap="round"
+                                                    strokeDasharray="1, 30"
+                                                    className="animate-pulse"
+                                                />
+                                                <path
+                                                    d="M20,20 L180,80 M180,20 L20,80"
+                                                    fill="none"
+                                                    stroke="black"
+                                                    strokeWidth="15"
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+
+                                    {isCompleted && (
+                                        <div className="absolute -top-6 -right-6 bg-black text-white p-4 vergamano-border rotate-12 font-black">
+                                            CONQUISTADA
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
+                            {/* Nodo de Conexión */}
+                            <div className="relative">
+                                <div className={`w-12 h-12 vergamano-border-thick rounded-none rotate-45 z-10 
+                                  ${isLocked ? 'bg-white' : 'bg-black'}`}
+                                />
+                            </div>
+
+                            <div className="flex-1" />
                         </div>
                     );
                 })}
             </div>
 
-            {/* Boss Fight / Evidence Upload Placeholder */}
-            <div className="fixed bottom-20 right-20 border-[8px] border-black p-8 bg-white max-w-md rotate-2 shadow-[20px_20px_0_rgba(0,0,0,1)]">
-                <h3 className="text-2xl font-black uppercase mb-4">PRUEBA_DE_CONQUISTA</h3>
-                <p className="font-courier text-sm mb-6">Sube evidencia para desbloquear la siguiente ciudad. Moltbot validará tu progreso.</p>
-                <button className="w-full bg-black text-white p-4 font-black hover:bg-[#FF1A1A] transition-colors">
-                    SUBIR EVIDENCIA / BOSS_FIGHT
-                </button>
+            <div className="mt-40 opacity-30 flex gap-4">
+                {Array.from({ length: 20 }).map((_, i) => (
+                    <div key={i} className="w-2 h-16 bg-black" />
+                ))}
             </div>
         </div>
     );
