@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { LSDFeed } from './components/vergamano/LSDFeed';
 import { ArenaView } from './components/vergamano/ArenaView';
+import { MoltbotChat } from './components/vergamano/MoltbotChat';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -27,11 +28,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white text-black font-mono p-0 overflow-x-hidden">
-      {/* HEADER BRUTALISTA */}
       <header className="border-b-[10px] border-black p-8 flex justify-between items-start">
         <div>
           <h1 className="text-8xl font-black tracking-tighter leading-none">VERGA<br/>MANO_HUD</h1>
-          <p className="text-xs font-bold mt-2">V3.5_LIFE_CLIENT</p>
+          <p className="text-xs font-bold mt-2">V3.5_LIFE_CLIENT // MOTOR: MOLTBOT</p>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
           <div className="flex gap-4">
@@ -49,7 +49,6 @@ function App() {
         </div>
       </header>
 
-      {/* NAV SECUNDARIO */}
       <nav className="border-b-[10px] border-black flex flex-wrap">
         {[
           { id: 'arena', label: 'ARENA' },
@@ -68,7 +67,6 @@ function App() {
         ))}
       </nav>
 
-      {/* MAIN CONTENT AREA */}
       <main className="grid grid-cols-12 min-h-screen">
         <section className="col-span-12 lg:col-span-9 p-12 border-r-[10px] border-black">
           {activeTab === 'lsd' && <LSDFeed />}
@@ -81,8 +79,9 @@ function App() {
           )}
         </section>
 
-        {/* SIDEBAR DE STATS */}
         <aside className="col-span-12 lg:col-span-3 p-8 bg-white space-y-8">
+          <MoltbotChat />
+          
           <div className="space-y-2">
             <p className="text-xs font-bold uppercase italic">Energía_Vital</p>
             <div className="flex gap-1">
@@ -103,10 +102,11 @@ function App() {
             </div>
           </div>
 
-          {/* AVATAR STATE */}
           <div className="border-[10px] border-black p-6 bg-black text-white text-center">
-            <p className="text-xs font-bold uppercase mb-4">Moltbot_Realtime</p>
-            <p className="text-2xl font-black uppercase italic tracking-widest text-green-400">Conectado_Activo</p>
+            <p className="text-xs font-bold uppercase mb-4">Avatar_State</p>
+            <p className="text-2xl font-black uppercase italic tracking-widest text-green-400">
+              {profile?.avatar_state || 'HEALTHY'}
+            </p>
             <div className="mt-8 opacity-20 text-6xl">👤</div>
           </div>
         </aside>
