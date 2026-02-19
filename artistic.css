@@ -1,169 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Permanent+Marker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;700&family=Permanent+Marker&family=Bebas+Neue&display=swap');
 
 :root {
-    --canvas-bg: #e0ddd5;
-    --ink-black: #0d0d0d;
-    --vergamano-red: #d90429;
-    --warhol-blue: #0077b6;
-    --warhol-yellow: #ffb703;
-    --warhol-pink: #ff006e;
-    --banksy-gray: #2b2d42;
+    --canvas-bg: #f2f0eb;
+    /* Color hueso más premium */
+    --ink-black: #121212;
+    --vergamano-red: #ff003c;
+    /* Rojo más vibrante */
+    --street-blue: #0055ff;
+    --premium-gold: #c5a059;
 }
 
 body {
     background-color: var(--canvas-bg);
     background-image:
         url("https://www.transparenttextures.com/patterns/canvas-orange.png"),
-        radial-gradient(circle at 10% 20%, rgba(0, 0, 0, 0.03) 0%, transparent 40%);
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
     color: var(--ink-black);
-    font-family: 'Space Mono', monospace;
+    font-family: 'Outfit', sans-serif;
     margin: 0;
     overflow-x: hidden;
+    letter-spacing: -0.02em;
 }
 
-/* TÍTULOS AGRESIVOS */
+/* TIPOGRAFÍA PREMIUM */
 .game-title {
-    font-family: 'Archivo Black', sans-serif;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: -5px;
-    line-height: 0.8;
+    letter-spacing: -0.06em;
+    line-height: 0.85;
     color: var(--ink-black);
-    transform: skewX(-5deg);
+}
+
+.bebas-font {
+    font-family: 'Bebas Neue', sans-serif;
 }
 
 .marker-font {
     font-family: 'Permanent Marker', cursive;
 }
 
+/* AVATAR CENTRAL LIMPIO */
+.avatar-container {
+    width: 250px;
+    height: 250px;
+    background: white;
+    border: 12px solid var(--ink-black);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 30px 30px 0px rgba(0, 0, 0, 0.05);
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hp-badge {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background: var(--vergamano-red);
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    box-shadow: 10px 10px 0px var(--ink-black);
+}
+
 /* PILLARES INTERACTIVOS */
 .pillar-card {
     background: white;
-    border: 6px solid var(--ink-black);
+    border: 4px solid var(--ink-black);
     padding: 1.5rem;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
 }
 
 .pillar-card:hover {
-    transform: translateY(-10px) rotate(2deg);
-    box-shadow: 15px 15px 0px var(--ink-black);
+    transform: translateY(-5px);
+    box-shadow: 12px 12px 0px var(--ink-black);
 }
 
 .pillar-card-active {
     background: var(--ink-black);
     color: white;
-    transform: scale(1.05) rotate(-1deg);
-    box-shadow: 20px 20px 0px var(--vergamano-red);
+    box-shadow: 15px 15px 0px var(--vergamano-red);
 }
 
-.pillar-card-active h4 {
-    color: white;
-    border-bottom-color: var(--vergamano-red);
-}
-
-.progress-bar-container {
-    width: 100%;
-    height: 12px;
-    background: #eee;
+.pillar-icon-box {
+    width: 60px;
+    height: 60px;
+    background: #f0f0f0;
     border: 2px solid var(--ink-black);
-    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
 }
 
-.progress-bar-fill {
-    height: 100%;
-    background: var(--vergamano-red);
-    transition: width 0.5s ease;
-}
-
-/* BOTONES DE NAVEGACIÓN VIDEOJUEGO */
+/* BOTONES NAVEGACIÓN (Clean & Bold) */
 .nav-tab {
-    font-family: 'Archivo Black', sans-serif;
-    font-size: 1.5rem;
-    padding: 15px 30px;
-    border: 4px solid var(--ink-black);
-    background: white;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 12px 24px;
+    border: 3px solid var(--ink-black);
+    background: transparent;
     cursor: pointer;
-    transition: all 0.1s;
+    transition: all 0.2s;
     text-transform: uppercase;
-    position: relative;
 }
 
 .nav-tab-active {
     background: var(--ink-black);
     color: white;
-    top: 5px;
-    left: 5px;
-    box-shadow: 0px 0px 0px;
-}
-
-.nav-tab:not(.nav-tab-active) {
-    box-shadow: 8px 8px 0px var(--ink-black);
 }
 
 .nav-tab:hover:not(.nav-tab-active) {
-    background: #f0f0f0;
+    background: rgba(0, 0, 0, 0.05);
 }
 
-/* ESTILO DE TAREAS MEJORADO */
-.task-container {
-    border: 4px solid var(--ink-black);
-    background: #fff;
-    padding: 2rem;
-    position: relative;
-}
-
-.task-step {
-    border-left: 4px solid var(--ink-black);
-    padding-left: 15px;
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-}
-
-.task-resource-link {
-    display: inline-block;
-    background: var(--ink-black);
-    color: white;
-    padding: 5px 15px;
-    text-decoration: none;
-    font-weight: bold;
-    margin-top: 10px;
-    transition: transform 0.1s;
-}
-
-.task-resource-link:hover {
-    transform: scale(1.05);
-    background: var(--vergamano-red);
-}
-
-/* MOLTBOT CHAT FIXES */
-.chat-scroll-fix {
-    height: 60vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding-right: 10px;
-}
-
+/* CHAT FIXES */
 .message-molt {
-    background: var(--ink-black);
-    color: white;
-    padding: 15px;
-    border-radius: 0px;
-    font-weight: bold;
-    max-width: 80%;
-    align-self: flex-start;
-    font-size: 1.2rem;
-    border-left: 8px solid var(--vergamano-red);
+    background: white;
+    color: var(--ink-black);
+    border: 4px solid var(--ink-black);
+    padding: 20px;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    font-size: 1.1rem;
+    max-width: 85%;
 }
 
 .message-rafa {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--ink-black);
+    background: var(--ink-black);
+    color: white;
     padding: 15px;
-    border: 2px dashed var(--ink-black);
     max-width: 80%;
     align-self: flex-end;
 }
