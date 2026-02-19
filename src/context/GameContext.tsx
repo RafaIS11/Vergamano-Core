@@ -83,18 +83,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             await fetchProfile();
             await fetchMissions();
 
-            // 10-country conquest map
+            // 10-country conquest route
             setCities([
-                { name: 'MADRID', xp_needed: 0, status: 'current', flag: '🇪🇸' },
-                { name: 'BERLIN', xp_needed: 1000, status: 'locked', flag: '🇩🇪' },
-                { name: 'TOKIO', xp_needed: 2500, status: 'locked', flag: '🇯🇵' },
-                { name: 'NUEVA YORK', xp_needed: 5000, status: 'locked', flag: '🇺🇸' },
-                { name: 'LONDRES', xp_needed: 7500, status: 'locked', flag: '🇬🇧' },
-                { name: 'PARIS', xp_needed: 10000, status: 'locked', flag: '🇫🇷' },
-                { name: 'DUBAI', xp_needed: 15000, status: 'locked', flag: '🇦🇪' },
-                { name: 'SINGAPUR', xp_needed: 20000, status: 'locked', flag: '🇸🇬' },
-                { name: 'CIUDAD DE MÉXICO', xp_needed: 25000, status: 'locked', flag: '🇲🇽' },
-                { name: 'SEOUL', xp_needed: 30000, status: 'locked', flag: '🇰🇷' },
+                { name: 'CARACAS', xp_needed: 0, status: 'current', flag: '🇻🇪' },
+                { name: 'MADRID', xp_needed: 1000, status: 'locked', flag: '🇪🇸' },
+                { name: 'BRUSELAS', xp_needed: 2500, status: 'locked', flag: '🇧🇪' },
+                { name: 'COPENHAGUE', xp_needed: 5000, status: 'locked', flag: '🇩🇰' },
+                { name: 'BERLÍN', xp_needed: 8000, status: 'locked', flag: '🇩🇪' },
+                { name: 'SAN FRANCISCO', xp_needed: 12000, status: 'locked', flag: '🇺🇸' },
+                { name: 'BALI', xp_needed: 17000, status: 'locked', flag: '🇮🇩' },
+                { name: 'OSLO', xp_needed: 23000, status: 'locked', flag: '🇳🇴' },
+                { name: 'LONDRES', xp_needed: 30000, status: 'locked', flag: '🇬🇧' },
+                { name: 'NUEVA YORK', xp_needed: 40000, status: 'locked', flag: '🇺🇸' },
             ]);
 
             // LSD Feed

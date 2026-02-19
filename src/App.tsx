@@ -6,6 +6,7 @@ import MarketView from './components/vergamano/MarketView';
 import { LSDFeed } from './components/vergamano/LSDFeed';
 import NeuralLinkView from './components/vergamano/NeuralLinkView';
 import { BasquiatCrown, InkSplatterSVG, ChaoticScribble, ScratchMarks } from './components/vergamano/ScribbleElements';
+import { FloAvatar } from './components/vergamano/FloAvatar';
 
 const PILARS = [
   { id: 'architect', label: 'ARQUITECTO', icon: '🏛️', xpKey: 'xp_architect', color: '#3b82f6' },
@@ -100,7 +101,7 @@ function App() {
           </div>
 
           {/* STATS BAR */}
-          <div className="border-[6px] border-black bg-white p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="border-[6px] border-black bg-white p-4 grid grid-cols-2 sm:grid-cols-5 gap-4 items-center">
             {/* HP */}
             <div className="border-r-2 border-black pr-4">
               <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mb-1">HP_PUNTOS_VIDA</p>
@@ -133,6 +134,11 @@ function App() {
               <p className="font-black text-3xl text-blue-600" style={{ fontFamily: "'Space Mono', monospace" }}>
                 {credits.toLocaleString()} CR
               </p>
+            </div>
+
+            {/* FLO AVATAR */}
+            <div className="flex items-center justify-center border-l-2 border-black pl-4">
+              <FloAvatar hp={hpPercent} className="w-24" />
             </div>
           </div>
         </header>

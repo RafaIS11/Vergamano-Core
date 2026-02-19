@@ -17,7 +17,7 @@ const supabase = createClient(
 );
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 const SYSTEM_PROMPT = `
 Eres MOLTBOT, el homie sin filtro de Rafael Ibarra y el Game Master de VergaMano OS.
@@ -63,7 +63,7 @@ async function getUserContext() {
 
     const { data: pendingTasks } = await supabase
         .from('tasks')
-        .select('title, pilar, xp_reward, status')
+        .select('title, power, xp_base, status')
         .eq('user_id', USER_ID)
         .eq('status', 'pending');
 
@@ -74,14 +74,15 @@ async function createTaskFromMoltbot(taskData) {
     const { error } = await supabase.from('tasks').insert([{
         user_id: USER_ID,
         title: taskData.titulo,
-        pilar: taskData.pilar,
-        xp_reward: parseInt(taskData.xp) || 100,
+        power: taskData.pilar, // DB column is 'power'
+        xp_base: parseInt(taskData.xp) || 100,
         description: taskData.descripcion,
         steps: taskData.pasos ? taskData.pasos.split('|').map(s => s.trim()) : [],
-        timer_minutes: parseInt(taskData.minutos) || 25,
-        status: 'pending'
+        estimated_minutes: parseInt(taskData.minutos) || 25,
+        status: 'pending',
+        generated_by: 'moltbot'
     }]);
-    if (error) console.error('[MOLTBOT] Error creando tarea:', error);
+    if (error) console.error('[MOLTBOT] Error creando tarea:', error.message || error);
     else console.log(`[MOLTBOT] Tarea creada: ${taskData.titulo}`);
 }
 
@@ -121,7 +122,7 @@ ESTADO ACTUAL DE RAFAEL:
 - XP Fantasma: ${profile.xp_ghost || 0}
 - Level: ${profile.level}
 - Créditos: ${profile.credits}
-- Misiones pendientes (${pendingTasks.length}): ${pendingTasks.map(t => t.title).join(', ') || 'ninguna'}
+- Misiones pendientes (${pendingTasks.length}): ${pendingTasks.map(t => `${t.title} [${t.power}]`).join(', ') || 'ninguna'}
 ` : '';
 
         const prompt = `${SYSTEM_PROMPT}\n${contextBlock}\nRafael dice: "${content}"\nMOLTBOT responde:`;
