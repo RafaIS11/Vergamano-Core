@@ -2,19 +2,28 @@
 import { useState, useEffect } from 'react';
 import type { Mission } from '../../types/game';
 import { useGame } from '../../context/GameContext';
-import { CheckSquare, List, Link } from 'lucide-react';
+import { CheckSquare, List, Link, Play, Square, Trophy } from 'lucide-react';
+import { InkSplatterSVG, BasquiatCrown } from './ScribbleElements';
 
 export const TaskCard = ({ mission }: { mission: Mission }) => {
     const { completeMission } = useGame();
-    const [seconds, setSeconds] = useState(mission.timer_minutes ? mission.timer_minutes * 60 : 0);
+    const [seconds, setSeconds] = useState(mission.timer_minutes ? mission.timer_minutes * 60 : 1500);
     const [isActive, setIsActive] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(mission.status === 'completed');
+    const [subtasks, setSubtasks] = useState(mission.subtasks || []);
+    const [completing, setCompleting] = useState(false);
+
+    const totalSeconds = mission.timer_minutes ? mission.timer_minutes * 60 : 1500;
+    const progress = ((totalSeconds - seconds) / totalSeconds) * 100;
 
     useEffect(() => {
-        let interval: any = null;
+        let interval: ReturnType<typeof setInterval> | null = null;
         if (isActive && seconds > 0) {
             interval = setInterval(() => setSeconds(s => s - 1), 1000);
+        } else if (seconds === 0) {
+            setIsActive(false);
         }
-        return () => clearInterval(interval);
+        return () => { if (interval) clearInterval(interval); };
     }, [isActive, seconds]);
 
     const formatTime = (s: number) => {
@@ -23,69 +32,180 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
         return `${m}:${sec < 10 ? '0' : ''}${sec}`;
     };
 
+    const handleComplete = async () => {
+        if (isCompleted || completing) return;
+        setCompleting(true);
+        await completeMission(mission.id, mission.xp_reward, mission.pilar);
+        setIsCompleted(true);
+        setIsActive(false);
+        setCompleting(false);
+    };
+
+    const toggleSubtask = (index: number) => {
+        setSubtasks(prev => prev.map((st, i) =>
+            i === index ? { ...st, completed: !st.completed } : st
+        ));
+    };
+
+    const PILAR_COLORS: Record<string, string> = {
+        architect: '#3b82f6',
+        spartan: '#ef4444',
+        mercenary: '#22c55e',
+        nomad: '#f59e0b',
+        ghost: '#8b5cf6',
+        work: '#3b82f6',
+        body: '#ef4444',
+    };
+    const pillarColor = PILAR_COLORS[mission.pilar] || '#000';
+
+    if (isCompleted) {
+        return (
+            <div className="relative border-[6px] border-black p-6 opacity-60 bg-gray-50" style={{ borderStyle: 'dashed' }}>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <svg viewBox="0 0 200 60" className="w-full opacity-30">
+                        <path d="M10 30 L190 30" stroke="black" strokeWidth="8" strokeLinecap="round" />
+                        <path d="M5 25 L195 35" stroke="black" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
+                    </svg>
+                </div>
+                <div className="flex items-center gap-4">
+                    <Trophy size={32} className="text-yellow-500" />
+                    <div>
+                        <h3 className="font-black text-xl line-through">{mission.title}</h3>
+                        <p className="text-sm font-bold text-green-600">+{mission.xp_reward} XP sumados al pilar {mission.pilar.toUpperCase()}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="task-card transform transition-transform hover:scale-[1.01]">
-            <div className="flex justify-between items-start mb-10">
-                <div className="max-w-2xl">
-                    <span className="bg-black text-white px-3 py-1 font-bold text-xs mb-3 inline-block">ID_OPERACIÓN: {mission.id}</span>
-                    <h3 className="game-title text-5xl leading-none mb-4">{mission.title}</h3>
-                    <p className="text-xl font-bold opacity-60 leading-relaxed">{mission.description}</p>
-                </div>
-                <div className="text-right">
-                    <div className="text-4xl font-black text-red-600">+{mission.xp_reward} XP</div>
-                    <div className="marker-font text-xl opacity-60 mt-2">{mission.pilar?.toUpperCase()}</div>
-                </div>
+        <div className="relative border-[8px] border-black bg-white hover:shadow-[12px_12px_0px_#000] transition-all duration-150">
+            {/* Ink splatter decoración */}
+            <div className="absolute -top-4 -right-4 w-10 h-10 pointer-events-none">
+                <InkSplatterSVG variant={1} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {/* SUBTAREAS */}
-                <div className="task-step-list">
-                    <h4 className="marker-font text-2xl mb-6 flex items-center gap-2"><CheckSquare /> SUBTAREAS</h4>
-                    {mission.subtasks?.map((st, i) => (
-                        <div key={i} className="flex items-center gap-4 mb-4 text-lg font-bold">
-                            <input type="checkbox" className="w-6 h-6 border-4 border-black" defaultChecked={st.completed} />
-                            <span>{st.label}</span>
+            {/* Header con pilar color */}
+            <div className="border-b-[6px] border-black p-4 flex justify-between items-center"
+                style={{ backgroundColor: pillarColor }}>
+                <div className="flex items-center gap-3">
+                    <BasquiatCrown className="w-8 h-5 text-white" />
+                    <span className="font-black text-white text-xs uppercase tracking-widest">
+                        {mission.pilar.toUpperCase()} // OPERACIÓN
+                    </span>
+                </div>
+                <span className="bg-black text-white px-3 py-1 font-black text-2xl">
+                    +{mission.xp_reward} XP
+                </span>
+            </div>
+
+            <div className="p-6">
+                <h3 className="font-black text-3xl uppercase mb-2 leading-none"
+                    style={{ fontFamily: "'Space Mono', monospace" }}>
+                    {mission.title}
+                </h3>
+                {mission.description && (
+                    <p className="text-sm font-bold opacity-60 mb-6 border-l-4 border-black pl-3">
+                        {mission.description}
+                    </p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* SUBTAREAS */}
+                    {subtasks.length > 0 && (
+                        <div>
+                            <h4 className="font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <CheckSquare size={14} /> OBJETIVOS
+                            </h4>
+                            {subtasks.map((st, i) => (
+                                <label key={i} className="flex items-center gap-3 mb-2 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={st.completed}
+                                        onChange={() => toggleSubtask(i)}
+                                        className="w-5 h-5 border-4 border-black cursor-pointer"
+                                    />
+                                    <span className={`text-sm font-bold ${st.completed ? 'line-through opacity-40' : ''}`}>
+                                        {st.label}
+                                    </span>
+                                </label>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    )}
 
-                {/* PASOS A PASO */}
-                <div className="task-step-list border-l-0 border-t-8 md:border-t-0 md:border-l-8 border-black">
-                    <h4 className="marker-font text-2xl mb-6 flex items-center gap-2"><List /> PASOS_EJECUCIÓN</h4>
-                    {mission.steps?.map((step, i) => (
-                        <div key={i} className="task-step-item">
-                            <span className="text-red-600">[{i + 1}]</span> {step}
+                    {/* PASOS */}
+                    {mission.steps && mission.steps.length > 0 && (
+                        <div>
+                            <h4 className="font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <List size={14} /> PROTOCOLO
+                            </h4>
+                            {mission.steps.map((step, i) => (
+                                <div key={i} className="flex gap-2 mb-2 text-sm font-bold">
+                                    <span className="text-red-600 font-black shrink-0">[{i + 1}]</span>
+                                    <span>{step}</span>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
                 </div>
-            </div>
 
-            {/* RECURSOS */}
-            <div className="flex gap-4 mt-8">
-                {mission.resources?.map((res, i) => (
-                    <a key={i} href={res.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-black text-white px-4 py-2 font-bold hover:bg-red-600 transition-all">
-                        <Link size={18} /> {res.label.toUpperCase()}
-                    </a>
-                ))}
-            </div>
+                {/* RECURSOS */}
+                {mission.resources && mission.resources.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        {mission.resources.map((res, i) => (
+                            <a key={i} href={res.url} target="_blank" rel="noreferrer"
+                                className="flex items-center gap-2 bg-black text-white px-3 py-2 text-xs font-black hover:bg-red-600 transition-colors">
+                                <Link size={12} /> {res.label}
+                            </a>
+                        ))}
+                    </div>
+                )}
 
-            {/* TIMER POMODORO */}
-            <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-8 border-t-4 border-black pt-8">
-                <div className="flex items-center gap-6">
-                    <div className="timer-box">{formatTime(seconds)}</div>
-                    <button
-                        onClick={() => setIsActive(!isActive)}
-                        className={`p-6 border-4 border-black font-black text-2xl transition-all ${isActive ? 'bg-red-600 text-white animate-pulse' : 'bg-white hover:bg-black hover:text-white'}`}
-                    >
-                        {isActive ? 'DETENER' : 'INICIAR_OPERACIÓN'}
-                    </button>
+                {/* TIMER + PROGRESO */}
+                <div className="border-t-4 border-black pt-4">
+                    {/* Progress bar */}
+                    <div className="h-3 border-2 border-black mb-4 relative">
+                        <div
+                            className="h-full transition-all duration-1000"
+                            style={{ width: `${progress}%`, backgroundColor: pillarColor }}
+                        />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                        {/* Timer */}
+                        <div className="flex items-center gap-3">
+                            <div className="bg-black text-white font-black text-3xl px-4 py-2"
+                                style={{ fontFamily: "'Space Mono', monospace" }}>
+                                {formatTime(seconds)}
+                            </div>
+                            <button
+                                onClick={() => setIsActive(!isActive)}
+                                className={`p-3 border-4 border-black font-black text-sm transition-all ${isActive
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-white hover:bg-black hover:text-white'
+                                    }`}
+                            >
+                                {isActive ? <Square size={20} /> : <Play size={20} />}
+                            </button>
+                            <button
+                                onClick={() => { setSeconds(totalSeconds); setIsActive(false); }}
+                                className="px-3 py-2 border-4 border-black text-xs font-black hover:bg-black hover:text-white transition-all"
+                            >
+                                RESET
+                            </button>
+                        </div>
+
+                        {/* Completar */}
+                        <button
+                            onClick={handleComplete}
+                            disabled={completing}
+                            className={`flex-1 py-4 font-black text-lg uppercase border-4 border-black transition-all
+                                ${completing ? 'opacity-50 cursor-wait' : 'bg-black text-white hover:bg-red-600 active:translate-y-1'}`}
+                        >
+                            {completing ? 'PROCESANDO...' : `✓ MISIÓN COMPLETADA (+${mission.xp_reward} XP)`}
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={() => completeMission(mission.id, 'proof_placeholder')}
-                    className="bg-black text-white px-10 py-6 text-3xl font-black hover:bg-red-600 transform hover:rotate-1 transition-all"
-                >
-                    MARCAR_COMO_COMPLETADA
-                </button>
             </div>
         </div>
     );

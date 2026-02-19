@@ -1,66 +1,82 @@
 
-export type ModuleType = 'arena' | 'map' | 'neural' | 'lsd' | 'market';
+// VERGAMANO OS - Game Types V5.0
+// 5 Pillars: architect, spartan, mercenary, nomad, ghost
+
+export type PilarType = 'architect' | 'spartan' | 'mercenary' | 'nomad' | 'ghost' | 'work' | 'body';
+export type MissionStatus = 'pending' | 'active' | 'auditing' | 'completed';
+export type ModuleType = 'arena' | 'map' | 'lsd' | 'market' | 'neural';
+export type CityStatus = 'conquered' | 'current' | 'locked';
+export type SenderType = 'rafael' | 'moltbot';
+
+export interface Subtask {
+    label: string;
+    completed: boolean;
+}
+
+export interface Resource {
+    label: string;
+    url: string;
+}
 
 export interface Mission {
     id: string;
-    user_id: string;
+    user_id?: string;
     title: string;
     description?: string;
-    pilar: 'work' | 'nomad' | 'body' | 'architect' | 'spartan' | 'mercenary' | 'ghost';
+    pilar: PilarType;
     xp_reward: number;
-    status: 'pending' | 'active' | 'auditing' | 'completed';
+    status: MissionStatus;
     evidence_url?: string;
-    started_at?: string;
-    created_at: string;
-    subtasks?: { label: string; completed: boolean }[];
     steps?: string[];
-    resources?: { label: string; url: string }[];
+    subtasks?: Subtask[];
+    resources?: Resource[];
     timer_minutes?: number;
-    icon?: string;
+    started_at?: string;
+    created_at?: string;
 }
 
-export interface City {
-    name: string;
-    xp_needed: number;
-    status: 'locked' | 'unlocked' | 'current';
-    flag?: string;
-    coordinates?: { x: number; y: number };
+export interface Profile {
+    id: string;
+    hp: number;
+    credits: number;
+    // Legacy XP columns (still in DB)
+    xp_work: number;
+    xp_nomad: number;
+    xp_body: number;
+    // V5 XP columns (5 pillars)
+    xp_architect: number;
+    xp_spartan: number;
+    xp_mercenary: number;
+    xp_ghost: number;
+    level: number;
+    status?: string;
+    avatar_url?: string;
 }
 
 export interface ChatMessage {
     id: string;
     user_id: string;
     content: string;
-    sender: 'rafael' | 'moltbot';
+    sender: SenderType;
     created_at: string;
 }
 
-export interface Profile {
-    id: string;
-    username?: string;
-    hp: number;
-    credits: number;
-    xp_work: number;
-    xp_nomad: number;
-    xp_body: number;
-    xp_architect?: number;
-    xp_spartan?: number;
-    xp_mercenary?: number;
-    xp_ghost?: number;
-    level: number;
-    status: string;
-    streak_days?: number;
+export interface City {
+    name: string;
+    xp_needed: number;
+    status: CityStatus;
+    flag?: string;
 }
 
 export interface FeedItem {
     id: string;
     title: string;
-    category?: string;
     url?: string;
+    source?: string;
+    category?: string;
     thumbnail_url?: string;
     how_to_apply?: string;
-    source?: string;
-    created_at: string;
+    created_at?: string;
 }
 
 export interface GameState {
