@@ -26,18 +26,20 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-black font-mono p-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white text-black font-mono p-0 overflow-x-hidden border-[20px] border-black">
+      {/* HEADER TÉCNICO */}
       <header className="border-b-[10px] border-black p-8 flex justify-between items-start">
         <div>
-          <h1 className="text-6xl font-black tracking-tighter leading-none">VERGA<br/>MANO_HUD</h1>
-          <p className="text-xs font-bold mt-2">V3.5_LIFE_CLIENT // MOTOR: MOLTBOT</p>
+          <h1 className="text-6xl font-black tracking-tighter leading-none uppercase">VergaMano_OS</h1>
+          <p className="text-sm font-bold mt-2 bg-black text-white px-2 inline-block">VERSION: 3.5.1 // MOTOR: MOLTBOT</p>
         </div>
         <div className="text-right">
-          <p className="text-4xl font-black">{currentTime.toLocaleTimeString([], {hour12: false})}</p>
-          <p className="text-sm font-bold bg-black text-white px-2">WED 18 FEB 2026</p>
+          <p className="text-5xl font-black">{currentTime.toLocaleTimeString([], {hour12: false})}</p>
+          <p className="text-xs font-bold uppercase mt-1">Sincronización Neuronal: Estable</p>
         </div>
       </header>
 
+      {/* NAVEGACIÓN TÉCNICA */}
       <nav className="border-b-[10px] border-black flex flex-wrap bg-white">
         {[
           { id: 'arena', label: 'ARENA' },
@@ -47,15 +49,16 @@ function App() {
           <button 
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-8 py-6 text-2xl font-black border-r-8 border-black transition-all ${activeTab === tab.id ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}
+            className={`px-12 py-8 text-3xl font-black border-r-[10px] border-black transition-all ${activeTab === tab.id ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}
           >
             {tab.label}
           </button>
         ))}
       </nav>
 
+      {/* CORE DISPLAY */}
       <main className="grid grid-cols-12 min-h-screen">
-        <section className="col-span-12 lg:col-span-9 p-8 border-r-[10px] border-black bg-white">
+        <section className="col-span-12 lg:col-span-8 p-10 border-r-[10px] border-black bg-white">
           {activeTab === 'lsd' && <LSDFeed />}
           {activeTab === 'arena' && <ArenaView />}
           {activeTab === 'map' && (
@@ -66,33 +69,35 @@ function App() {
           )}
         </section>
 
-        <aside className="col-span-12 lg:col-span-3 p-8 bg-white space-y-8">
-          <div className="space-y-2 border-4 border-black p-4">
-            <p className="text-xs font-bold uppercase italic border-b-2 border-black mb-4">Biometría</p>
-            <p className={`text-4xl font-black ${profile?.hp < 30 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
-              {profile?.hp || 100}% HP
-            </p>
-            <div className="flex gap-1 mt-4">
+        {/* SIDEBAR DE STATUS */}
+        <aside className="col-span-12 lg:col-span-4 p-10 bg-white space-y-12">
+          <div className="space-y-4 border-[10px] border-black p-6">
+            <p className="text-sm font-black uppercase italic border-b-4 border-black pb-2">Status_Biométrico</p>
+            <div className="flex justify-between items-end">
+              <p className="text-7xl font-black">{profile?.hp || 100}%</p>
+              <p className="text-2xl font-black uppercase">HP_Level</p>
+            </div>
+            <div className="flex gap-2 mt-6 h-10">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className={`h-6 w-full border-2 border-black ${i < (profile?.hp / 10) ? 'bg-black' : 'bg-transparent'}`} />
+                <div key={i} className={`h-full w-full border-4 border-black ${i < (profile?.hp / 10) ? 'bg-black' : 'bg-transparent'}`} />
               ))}
             </div>
           </div>
 
-          <div className="border-8 border-black p-4 space-y-4 bg-gray-100">
-            <div className="flex justify-between items-end border-b-2 border-black pb-2">
-              <span className="text-xs font-bold uppercase">Divisa</span>
-              <span className="text-3xl font-black">{profile?.streak_days * 10 || 0} CR</span>
+          <div className="border-[10px] border-black p-6 space-y-6 bg-gray-50">
+            <div className="flex justify-between items-end border-b-4 border-black pb-4">
+              <span className="text-sm font-black uppercase">Divisa_Global</span>
+              <span className="text-5xl font-black">{profile?.streak_days * 10 || 0} CR</span>
             </div>
             <div className="flex justify-between items-end">
-              <span className="text-xs font-bold uppercase">Operator</span>
-              <span className="text-xl font-black uppercase underline">Rafael_IS</span>
+              <span className="text-sm font-black uppercase">OPERATOR</span>
+              <span className="text-3xl font-black uppercase underline decoration-8">Rafael_IS</span>
             </div>
           </div>
 
-          <div className="border-[10px] border-black p-6 bg-black text-white text-center">
-            <p className="text-xs font-bold uppercase mb-4">Moltbot_Link</p>
-            <p className="text-xl font-black uppercase italic text-green-400 animate-pulse">Online_Stable</p>
+          <div className="border-[10px] border-black p-8 bg-black text-white text-center">
+            <p className="text-xs font-black uppercase tracking-widest mb-4">Neural_Bridge_Active</p>
+            <p className="text-3xl font-black uppercase italic text-green-400 animate-pulse font-mono">ONLINE_STABLE</p>
           </div>
         </aside>
       </main>

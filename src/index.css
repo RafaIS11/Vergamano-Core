@@ -1,346 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 0% 0%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 0%;
-    --input: 0 0% 0%;
-    --ring: 0 0% 0%;
-    --radius: 0;
-  }
+:root {
+  --bg-paper: #FFFFFF;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  
-  html {
-    scroll-behavior: auto;
-  }
-  
-  body {
-    @apply bg-white text-black;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-  }
+body {
+  background-color: var(--bg-paper);
+  font-family: 'Space Mono', monospace;
+  color: black;
+  margin: 0;
+  padding: 0;
 }
 
-/* Typography Classes */
-.font-helvetica {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+.brutal-border {
+  border: 10px solid black;
 }
 
-.font-courier {
-  font-family: 'Courier Prime', 'Courier New', monospace;
+.brutal-shadow {
+  box-shadow: 12px 12px 0px 0px black;
 }
 
-/* Swiss Grid System - Heavy 8pt Borders */
-.brutalist-border {
-  border: 8pt solid #000000;
+header, nav, main, section, aside {
+  border-color: black !important;
 }
 
-.brutalist-border-thick {
-  border: 12pt solid #000000;
+button {
+  transition: all 0.2s ease;
 }
 
-.brutalist-border-thin {
-  border: 4pt solid #000000;
-}
-
-.brutalist-grid-cell {
-  border: 8pt solid #000000;
-  background: #FFFFFF;
-}
-
-/* Crossed Out Text Effect */
-.crossed-out {
-  position: relative;
-  display: inline-block;
-}
-
-.crossed-out::after {
-  content: '';
-  position: absolute;
-  left: -5%;
-  top: 50%;
-  width: 110%;
-  height: 8pt;
-  background: #000000;
-  transform: rotate(-3deg);
-}
-
-.crossed-out-steep::after {
-  transform: rotate(-12deg);
-}
-
-/* Ink Splatters */
-.ink-splatter {
-  position: absolute;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.9;
-}
-
-/* Photocopy Grain Texture */
-.grain-texture {
-  position: relative;
-}
-
-.grain-texture::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.15;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
-/* Hand-drawn Arrow */
-.hand-arrow {
-  stroke: #000000;
-  stroke-width: 3;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Distorted Card Effect */
-.distorted-card {
-  background: #FFFFFF;
-  border: 8pt solid #000000;
-  position: relative;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.distorted-card:hover {
-  transform: skew(-2deg, 1deg) scale(1.02);
-}
-
-.distorted-card::before {
-  content: '';
-  position: absolute;
-  inset: -4pt;
-  border: 2pt solid #000000;
-  opacity: 0.3;
-  pointer-events: none;
-}
-
-/* Scribble Animation */
-@keyframes scribble {
-  0% { stroke-dashoffset: 1000; }
-  100% { stroke-dashoffset: 0; }
-}
-
-.scribble-path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: scribble 2s ease-out forwards;
-}
-
-/* Glitch Effect */
-@keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-}
-
-.glitch-hover:hover {
-  animation: glitch 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Data Metric Pulse */
-@keyframes metricPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.metric-pulse {
-  animation: metricPulse 2s ease-in-out infinite;
-}
-
-/* Raw Edge Effect */
-.raw-edge {
-  clip-path: polygon(
-    0% 2%, 3% 0%, 98% 1%, 100% 3%,
-    99% 97%, 97% 100%, 2% 99%, 0% 97%
-  );
-}
-
-/* Basquiat-style Crown */
-.basquiat-crown {
-  stroke: #000000;
-  stroke-width: 4;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Chaotic Underline */
-.chaotic-underline {
-  position: relative;
-}
-
-.chaotic-underline::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 100%;
-  height: 3pt;
-  background: #000000;
-  clip-path: polygon(
-    0% 50%, 10% 30%, 20% 60%, 30% 40%,
-    40% 70%, 50% 30%, 60% 50%, 70% 40%,
-    80% 60%, 90% 30%, 100% 50%, 100% 70%,
-    90% 80%, 80% 60%, 70% 80%, 60% 60%,
-    50% 80%, 40% 60%, 30% 80%, 20% 60%,
-    10% 80%, 0% 70%
-  );
-}
-
-/* Scan Line Effect */
-.scan-lines {
-  position: relative;
-}
-
-.scan-lines::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
-  );
-  pointer-events: none;
-}
-
-/* Monochrome Filter */
-.monochrome {
-  filter: grayscale(100%) contrast(1.2);
-}
-
-/* Sharp Focus Shadow */
-.sharp-shadow {
-  box-shadow: 8px 8px 0 0 #000000;
-}
-
-/* Grid Lines */
-.grid-lines {
-  background-image: 
-    linear-gradient(to right, #000000 1px, transparent 1px),
-    linear-gradient(to bottom, #000000 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* Typewriter Cursor */
-.typewriter-cursor::after {
-  content: '_';
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-/* Chaos Overlay */
-.chaos-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* Brutalist Button */
-.brutalist-btn {
-  background: #FFFFFF;
-  border: 6pt solid #000000;
-  padding: 12px 24px;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 0.1s ease;
-}
-
-.brutalist-btn:hover {
-  background: #000000;
-  color: #FFFFFF;
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 0 #000000;
-}
-
-.brutalist-btn:active {
-  transform: translate(0, 0);
+button:active {
+  transform: translate(4px, 4px);
   box-shadow: none;
-}
-
-/* Section Divider */
-.section-divider {
-  height: 8pt;
-  background: #000000;
-  width: 100%;
-}
-
-/* Data Stream Effect */
-@keyframes dataStream {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-.data-stream {
-  animation: dataStream 3s linear infinite;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 12pt;
-}
-
-::-webkit-scrollbar-track {
-  background: #FFFFFF;
-  border-left: 4pt solid #000000;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #000000;
-  border: 2pt solid #FFFFFF;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #333333;
-}
-
-/* Selection */
-::selection {
-  background: #000000;
-  color: #FFFFFF;
 }
