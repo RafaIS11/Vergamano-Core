@@ -6,18 +6,25 @@ export interface Mission {
     user_id: string;
     title: string;
     description?: string;
-    pilar: 'work' | 'nomad' | 'body';
+    pilar: 'work' | 'nomad' | 'body' | 'architect' | 'spartan' | 'mercenary' | 'ghost';
     xp_reward: number;
     status: 'pending' | 'active' | 'auditing' | 'completed';
     evidence_url?: string;
     started_at?: string;
     created_at: string;
+    subtasks?: { label: string; completed: boolean }[];
+    steps?: string[];
+    resources?: { label: string; url: string }[];
+    timer_minutes?: number;
+    icon?: string;
 }
 
 export interface City {
     name: string;
     xp_needed: number;
-    status: string;
+    status: 'locked' | 'unlocked' | 'current';
+    flag?: string;
+    coordinates?: { x: number; y: number };
 }
 
 export interface ChatMessage {
@@ -30,6 +37,7 @@ export interface ChatMessage {
 
 export interface Profile {
     id: string;
+    username?: string;
     hp: number;
     credits: number;
     xp_work: number;
@@ -49,6 +57,8 @@ export interface FeedItem {
     title: string;
     category?: string;
     url?: string;
+    thumbnail_url?: string;
+    how_to_apply?: string;
     source?: string;
     created_at: string;
 }
@@ -60,6 +70,7 @@ export interface GameState {
     chatMessages: ChatMessage[];
     feedItems: FeedItem[];
     activeModule: ModuleType;
+    activePillar: string | null;
     isBunkerMode: boolean;
     isLoading: boolean;
 }

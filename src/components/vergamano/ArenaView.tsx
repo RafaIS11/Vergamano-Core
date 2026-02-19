@@ -2,48 +2,49 @@
 import { useGame } from '../../context/GameContext';
 import { TaskCard } from './TaskCard';
 
-export const ArenaView = () => {
-  const { missions } = useGame();
+const ArenaView = () => {
+  const { missions, activePillar } = useGame();
+
+  // Filtrar misiones por pilar si hay uno seleccionado
+  const filteredMissions = activePillar
+    ? missions.filter(m => m.pilar === activePillar)
+    : missions;
+
+  const available = filteredMissions.filter(m => m.status === 'pending');
+  const inProgress = filteredMissions.filter(m => m.status === 'active');
+  const auditing = filteredMissions.filter(m => m.status === 'auditing');
 
   return (
-    <div className="max-w-4xl mx-auto py-10">
-      <div className="mb-12">
-        <h2 className="basquiat-font text-6xl uppercase mb-2">LA_ARENA</h2>
-        <p className="typewriter text-lg bg-black text-white inline-block px-4 py-1">
-          OPERACIONES_ACTIVAS_CENTRO_DE_MANDO
-        </p>
+    <div className="space-y-16">
+      <div className="flex justify-between items-end border-b-4 border-black pb-4">
+        <h2 className="game-title text-5xl">Mission_Control</h2>
+        {activePillar && (
+          <span className="bg-black text-white px-4 py-1 font-bold animate-pulse">
+            FILTERED_BY: {activePillar.toUpperCase()}
+          </span>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <section>
-          <h3 className="basquiat-font text-2xl mb-6 border-b-4 border-black inline-block">MISIONES_DISPONIBLES</h3>
-          {missions?.filter(m => m.status === 'pending').length === 0 ? (
-            <p className="font-mono italic text-gray-500">Moltbot está preparando nuevas órdenes...</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="space-y-8">
+          <h3 className="marker-font text-3xl text-red-600">// ACTIVE_OPERATIONS</h3>
+          {inProgress.length > 0 ? (
+            inProgress.map(mission => <TaskCard key={mission.id} mission={mission} />)
           ) : (
-            missions?.filter(m => m.status === 'pending').map(task => (
-              <TaskCard key={task.id} task={task} />
-            ))
-          )}
-        </section>
-
-        <section>
-          <h3 className="basquiat-font text-2xl mb-6 border-b-4 border-black inline-block">EN_CURSO</h3>
-          {missions?.filter(m => m.status === 'active').length === 0 ? (
-            <div className="basquiat-border p-10 text-center opacity-30">
-              <p className="basquiat-font text-xl">NO_HAY_OPERACIONES</p>
+            <div className="p-10 border-4 border-dashed border-gray-300 text-center opacity-50 font-bold">
+              NO_ACTIVE_TASKS. SELECT_MISSION_BELOW.
             </div>
-          ) : (
-            missions?.filter(m => m.status === 'active').map(task => (
-              <TaskCard key={task.id} task={task} />
-            ))
           )}
-        </section>
-      </div>
 
-      {/* Botón de Emergencia para hablar con Moltbot */}
-      <div className="mt-20 border-t-8 border-black pt-10">
-        <div className="banksy-card text-center text-2xl">
-          ¿PERDIDO? ENVÍA UN MENSAJE AL ENLACE NEURAL
+          <h3 className="marker-font text-3xl text-blue-600">// AUDIT_PENDING</h3>
+          {auditing.map(mission => <TaskCard key={mission.id} mission={mission} />)}
+        </div>
+
+        <div className="space-y-8">
+          <h3 className="marker-font text-3xl">// AVAILABLE_INTEL</h3>
+          <div className="grid grid-cols-1 gap-6">
+            {available.map(mission => <TaskCard key={mission.id} mission={mission} />)}
+          </div>
         </div>
       </div>
     </div>

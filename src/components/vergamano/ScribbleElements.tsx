@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 
 // Basquiat-style Crown
 export const BasquiatCrown: React.FC<{ className?: string }> = ({ className = '' }) => (

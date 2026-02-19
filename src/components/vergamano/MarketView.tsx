@@ -1,74 +1,81 @@
 
-
 import { useGame } from '../../context/GameContext';
-import { ShoppingBag, CreditCard, Tag } from 'lucide-react';
-
-const REWARDS = [
-    { id: 'cheesecake', title: 'CHEESECAKE (EL BUENO)', cost: 500, description: 'Recompensas de dopamina inmediata. Solo si lo mereces.' },
-    { id: 'cita', title: 'CITA / SALIDA SOCIAL', cost: 2000, description: 'Desbloquea el mundo exterior. Solo con saldo positivo.' },
-    { id: 'shoes', title: 'NUEVAS ZAPATILLAS', cost: 5000, description: 'Equipamiento táctico para tu cuerpo. Requiere grind extremo.' },
-    { id: 'tech', title: 'APP O GADGET NUEVO', cost: 1500, description: 'Inversión en arquitectura. Moltbot auditará la utilidad.' }
-];
+import { ShoppingCart, Tag, Zap } from 'lucide-react';
 
 const MarketView = () => {
-    const { profile, buyReward } = useGame();
+    const { profile } = useGame();
+
+    const rewards = [
+        {
+            id: '1', name: 'DIGITAL_BUNKER', cost: 1500, type: 'perk',
+            img: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?auto=format&fit=crop&q=80&w=400',
+            desc: 'Unlock private channel in Neural Link.'
+        },
+        {
+            id: '2', name: 'ADRENALINE_SHOT', cost: 500, type: 'boost',
+            img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=400',
+            desc: '+20% XP boost for the next 24 hours.'
+        },
+        {
+            id: '3', name: 'SOVEREIGN_ID_CARD', cost: 3000, type: 'status',
+            img: 'https://images.unsplash.com/photo-1512446813987-199187383a1a?auto=format&fit=crop&q=80&w=400',
+            desc: 'Visual upgrade for your Operator profile.'
+        },
+        {
+            id: '4', name: 'INTEL_DROPS', cost: 200, type: 'info',
+            img: 'https://images.unsplash.com/photo-1557597774-9d2739f3775b?auto=format&fit=crop&q=80&w=400',
+            desc: 'Unlock 3 high-priority news in LSD Feed.'
+        }
+    ];
 
     return (
-        <div className="p-8 bg-white min-h-screen">
-            <div className="flex justify-between items-end border-b-[12px] border-black pb-4 mb-8">
-                <div>
-                    <h2 className="text-6xl font-black uppercase tracking-tighter">MERCADO_NEGRO</h2>
-                    <p className="font-courier text-sm mt-2 opacity-60 uppercase tracking-widest">INTERCAMBIA TU ESFUERZO POR RECOMPENSAS REALES</p>
-                </div>
-                <div className="text-right flex flex-col items-end">
-                    <span className="font-courier text-xs uppercase opacity-40">SALDO DISPONIBLE</span>
-                    <span className="bg-[#FFD700] text-black px-6 py-2 border-[4px] border-black font-black text-4xl shadow-[8px_8px_0_rgba(0,0,0,1)]">
-                        {profile?.credits || 0} CR
-                    </span>
+        <div className="space-y-16">
+            <div className="flex justify-between items-center border-b-8 border-black pb-8">
+                <h2 className="game-title text-6xl">THE_MARKET</h2>
+                <div className="bg-blue-600 text-white p-6 border-4 border-black flex items-center gap-4 transform -rotate-2">
+                    <span className="text-sm font-bold opacity-70">CURRENT_BALANCE:</span>
+                    <span className="text-4xl font-black">{profile?.credits || 0} CR</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {REWARDS.map((reward) => (
-                    <div key={reward.id} className="border-[8px] border-black p-8 relative flex flex-col bg-[#F9F9F9] hover:bg-white transition-colors">
-                        <div className="absolute top-4 right-4 text-gray-300">
-                            <ShoppingBag size={48} strokeWidth={3} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                {rewards.map(item => (
+                    <div key={item.id} className="flex flex-col border-4 border-black bg-white group transition-all hover:scale-105">
+                        <div className="h-48 overflow-hidden relative border-b-4 border-black bg-gray-200">
+                            <img src={item.img} alt={item.name} className="w-full h-full object-cover filter contrast-125 brightness-75 group-hover:brightness-100 transition-all" />
+                            <div className="absolute top-2 right-2 bg-yellow-400 text-black px-3 py-1 font-bold text-xs border-2 border-black flex items-center gap-1">
+                                <Zap size={12} /> {item.type.toUpperCase()}
+                            </div>
                         </div>
 
-                        <h3 className="text-3xl font-black uppercase leading-tight mb-2 pr-12">
-                            {reward.title}
-                        </h3>
+                        <div className="p-6 flex-1 flex flex-col items-center text-center">
+                            <h3 className="marker-font text-2xl mb-4">{item.name}</h3>
+                            <p className="text-xs font-bold opacity-60 mb-6">{item.desc.toUpperCase()}</p>
 
-                        <p className="font-courier text-sm mb-8 opacity-60">
-                            {reward.description}
-                        </p>
-
-                        <div className="mt-auto flex items-center justify-between border-t-[4px] border-black pt-6">
-                            <div className="flex items-center gap-2">
-                                <Tag className="text-[#FF1A1A]" />
-                                <span className="text-4xl font-black">{reward.cost} <span className="text-sm font-bold">CR</span></span>
+                            <div className="mt-auto w-full">
+                                <div className="text-3xl font-black mb-4">{item.cost} <span className="text-sm">CR</span></div>
+                                <button className="w-full bg-black text-white p-4 font-black flex items-center justify-center gap-3 hover:bg-green-600 transition-all border-4 border-black">
+                                    <ShoppingCart size={20} /> PURCHASE_UPGRADE
+                                </button>
                             </div>
-
-                            <button
-                                onClick={() => buyReward(reward.id, reward.cost)}
-                                disabled={(profile?.credits || 0) < reward.cost}
-                                className={`flex items-center gap-3 px-8 py-4 font-black text-xl transition-all
-                  ${(profile?.credits || 0) >= reward.cost
-                                        ? 'bg-black text-white hover:bg-[#FF1A1A] hover:scale-105 active:scale-95'
-                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed border-[4px] border-gray-400'}`}
-                            >
-                                <CreditCard /> COMPRAR
-                            </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="mt-12 p-8 border-[4px] border-black border-dashed bg-[#FFFBEB]">
-                <h4 className="text-xl font-bold uppercase mb-2">(!) REGLA DEL JUEGO</h4>
-                <p className="font-courier text-sm italic">
-                    No puedes comprar fuera de la app. Si lo haces, estás hackeando tu propia vida y Moltbot lo sabrá. El castigo por hackeo es un reset de HP.
-                </p>
+            {/* DECORATIVE SHOP ELEMENTS */}
+            <div className="bg-black text-white p-10 transform skew-x-3 mt-20 flex justify-between items-center">
+                <div className="flex gap-10 items-center">
+                    <Tag size={64} className="opacity-20 translate-x-10" />
+                    <div>
+                        <p className="marker-font text-4xl">DAILY_DEALS_ACTIVE</p>
+                        <p className="font-mono">NEXT_REFRESH: 14:22:09</p>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm opacity-50 font-bold mb-2">// MARKET_NOTICE</p>
+                    <p className="max-w-xs text-xs font-bold italic">ALL PURCHASES ARE FINAL. NO REFUNDS IN THE SOVEREIGN OPERATING SYSTEM. OPERATE WITH CAUTION.</p>
+                </div>
             </div>
         </div>
     );

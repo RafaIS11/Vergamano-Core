@@ -1,97 +1,87 @@
 
-
+import 'react';
 import { useGame } from '../../context/GameContext';
-
-const CITIES = [
-    { name: 'CARACAS', xp_needed: 0, status: 'Conquistada' },
-    { name: 'MADRID', xp_needed: 500, status: 'Objetivo Actual' },
-    { name: 'BRUSELAS', xp_needed: 2000, status: 'Bloqueada' },
-    { name: 'BERLÍN', xp_needed: 5000, status: 'Bloqueada' },
-    { name: 'TOKIO', xp_needed: 10000, status: 'Bloqueada' },
-    { name: 'NUEVA YORK', xp_needed: 20000, status: 'Bloqueada' },
-    { name: 'LONDRES', xp_needed: 35000, status: 'Bloqueada' },
-    { name: 'PARÍS', xp_needed: 50000, status: 'Bloqueada' },
-    { name: 'DUBÁI', xp_needed: 75000, status: 'Bloqueada' },
-    { name: 'SINGAPUR', xp_needed: 100000, status: 'Bloqueada' }
-];
+import { Lock, MapPin, Flag } from 'lucide-react';
 
 const MapView = () => {
-    const { profile } = useGame();
-    const currentXP = profile?.xp_nomad || 0;
+    const { cities } = useGame();
 
     return (
-        <div className="py-20 flex flex-col items-center relative">
-            <h2 className="text-7xl font-black italic mb-20 border-b-8 border-black w-full text-center pb-8">
-                MAPA_DE_CONQUISTA
-            </h2>
+        <div className="relative min-h-[80vh] overflow-hidden bg-[#f0f0f0] p-10 border-4 border-black">
+            {/* BACKGROUND CANVAS GRID */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-            {/* Línea Central Brutalista */}
-            <div className="absolute top-48 bottom-0 w-2 bg-black left-1/2 -translate-x-1/2 z-0" />
+            <h2 className="game-title text-6xl mb-20 relative z-10">WORLD_DOMINATION_PATH</h2>
 
-            <div className="flex flex-col gap-32 relative z-10 w-full max-w-4xl">
-                {CITIES.map((city, index) => {
-                    const isLocked = currentXP < city.xp_needed;
-                    const isCompleted = index === 0; // Solo para demostración
+            <div className="relative max-w-4xl mx-auto py-20">
+                {/* SVG CONNECTION LINE */}
+                <svg className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-20" style={{ zIndex: 0 }}>
+                    <path
+                        d="M 500 0 Q 700 200 500 400 T 500 800"
+                        fill="none"
+                        stroke="black"
+                        strokeWidth="8"
+                        strokeDasharray="20 20"
+                    />
+                </svg>
 
-                    return (
-                        <div key={city.name} className={`flex items-center gap-12 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
+                <div className="flex flex-col gap-32 relative z-10">
+                    {cities.map((city, index) => {
+                        const isEven = index % 2 === 0;
+                        const isLocked = city.status === 'locked';
+                        const isCurrent = city.status === 'current';
 
-                            <div className="flex-1 flex flex-col items-center">
-                                <div className={`vergamano-border-thick p-8 bg-white vergamano-shadow-large relative w-full
-                                  ${isLocked ? 'opacity-50' : ''}`}>
+                        return (
+                            <div
+                                key={city.name}
+                                className={`flex items-center gap-10 ${isEven ? 'flex-row' : 'flex-row-reverse'} transition-all`}
+                            >
+                                {/* CITY NODE */}
+                                <div className="relative group">
+                                    <div className={`
+                                        w-32 h-32 rounded-full border-8 border-black flex items-center justify-center text-4xl
+                                        transition-all duration-300 transform group-hover:scale-110 shadow-xl
+                                        ${isCurrent ? 'bg-red-600 animate-bounce' : isLocked ? 'bg-gray-400 grayscale' : 'bg-white'}
+                                    `}>
+                                        {isLocked ? <Lock size={40} /> : <span className="text-6xl">{city.flag || '📍'}</span>}
+                                    </div>
 
-                                    <h3 className="text-4xl font-black italic">{city.name}</h3>
-                                    <span className="font-bold text-sm block mt-2 opacity-60">REQUISITO: {city.xp_needed} XP_NOMAD</span>
-
-                                    {/* Efecto de Spray Negro para ciudades bloqueadas */}
-                                    {isLocked && (
-                                        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center p-4">
-                                            <svg viewBox="0 0 200 100" className="w-full h-full opacity-90">
-                                                <path
-                                                    d="M10,50 Q40,10 80,60 T150,40 T190,80"
-                                                    fill="none"
-                                                    stroke="black"
-                                                    strokeWidth="25"
-                                                    strokeLinecap="round"
-                                                    strokeDasharray="1, 30"
-                                                    className="animate-pulse"
-                                                />
-                                                <path
-                                                    d="M20,20 L180,80 M180,20 L20,80"
-                                                    fill="none"
-                                                    stroke="black"
-                                                    strokeWidth="15"
-                                                    strokeLinecap="round"
-                                                />
-                                            </svg>
-                                        </div>
-                                    )}
-
-                                    {isCompleted && (
-                                        <div className="absolute -top-6 -right-6 bg-black text-white p-4 vergamano-border rotate-12 font-black">
-                                            CONQUISTADA
+                                    {isCurrent && (
+                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-1 font-bold whitespace-nowrap animate-pulse">
+                                            YOU_ARE_HERE
                                         </div>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Nodo de Conexión */}
-                            <div className="relative">
-                                <div className={`w-12 h-12 vergamano-border-thick rounded-none rotate-45 z-10 
-                                  ${isLocked ? 'bg-white' : 'bg-black'}`}
-                                />
+                                {/* CITY INFO */}
+                                <div className={`max-w-xs ${isEven ? 'text-left' : 'text-right'}`}>
+                                    <h3 className="game-title text-4xl mb-2">{city.name}</h3>
+                                    <p className="typewriter text-sm font-bold opacity-60">
+                                        {isLocked ? `LOCKED: NEEDS ${city.xp_needed} XP` : 'UNLOCKED_READY_FOR_OPERATIONS'}
+                                    </p>
+                                    <div className="flex gap-2 mt-4 justify-start">
+                                        <div className="h-4 w-4 bg-black rounded-full" />
+                                        <div className="h-4 w-4 bg-black rounded-full opacity-20" />
+                                        <div className="h-4 w-4 bg-black rounded-full opacity-20" />
+                                    </div>
+                                </div>
                             </div>
-
-                            <div className="flex-1" />
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
 
-            <div className="mt-40 opacity-30 flex gap-4">
-                {Array.from({ length: 20 }).map((_, i) => (
-                    <div key={i} className="w-2 h-16 bg-black" />
-                ))}
+            {/* DECORATIVE ELEMENTS */}
+            <div className="absolute bottom-10 right-10 marker-font text-3xl opacity-20 whitespace-pre">
+                BERLIN_SECTOR_02<br />
+                BERNE_SECTOR_03<br />
+                TOKYO_LOCKED
+            </div>
+
+            <div className="absolute top-20 right-20 flex flex-col items-center">
+                <div className="w-16 h-16 bg-red-600 rounded-full animate-ping opacity-50" />
+                <span className="font-bold text-red-600">INTEL_SIGNAL_STRENGTH: 88%</span>
             </div>
         </div>
     );
