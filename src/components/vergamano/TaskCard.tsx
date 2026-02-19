@@ -2,19 +2,21 @@
 import { useState, useEffect } from 'react';
 import type { Mission } from '../../types/game';
 import { useGame } from '../../context/GameContext';
-import { CheckSquare, List, Link, Play, Square, Trophy } from 'lucide-react';
+import { CheckSquare, List, Play, Square, Trophy } from 'lucide-react';
 import { InkSplatterSVG, BasquiatCrown } from './ScribbleElements';
 
 export const TaskCard = ({ mission }: { mission: Mission }) => {
     const { completeMission } = useGame();
-    const [seconds, setSeconds] = useState(mission.timer_minutes ? mission.timer_minutes * 60 : 1500);
+    const durationSecs = (mission.timer_minutes || mission.estimated_minutes || 25) * 60;
+    const [seconds, setSeconds] = useState(durationSecs);
     const [isActive, setIsActive] = useState(false);
     const [isCompleted, setIsCompleted] = useState(mission.status === 'completed');
-    const [subtasks, setSubtasks] = useState(mission.subtasks || []);
     const [completing, setCompleting] = useState(false);
+    const steps: string[] = mission.steps || [];
 
-    const totalSeconds = mission.timer_minutes ? mission.timer_minutes * 60 : 1500;
-    const progress = ((totalSeconds - seconds) / totalSeconds) * 100;
+    const progress = ((durationSecs - seconds) / durationSecs) * 100;
+    const xpAmount = mission.xp_base || (mission as any).xp_reward || 100;
+    const power = mission.power || (mission as any).pilar || 'architect';
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval> | null = null;
@@ -35,19 +37,13 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
     const handleComplete = async () => {
         if (isCompleted || completing) return;
         setCompleting(true);
-        await completeMission(mission.id, mission.xp_reward, mission.pilar);
+        await completeMission(mission.id, xpAmount, power);
         setIsCompleted(true);
         setIsActive(false);
         setCompleting(false);
     };
 
-    const toggleSubtask = (index: number) => {
-        setSubtasks(prev => prev.map((st, i) =>
-            i === index ? { ...st, completed: !st.completed } : st
-        ));
-    };
-
-    const PILAR_COLORS: Record<string, string> = {
+    const POWER_COLORS: Record<string, string> = {
         architect: '#3b82f6',
         spartan: '#ef4444',
         mercenary: '#22c55e',
@@ -56,7 +52,7 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
         work: '#3b82f6',
         body: '#ef4444',
     };
-    const pillarColor = PILAR_COLORS[mission.pilar] || '#000';
+    const pillarColor = POWER_COLORS[power] || '#000';
 
     if (isCompleted) {
         return (
@@ -71,7 +67,7 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                     <Trophy size={32} className="text-yellow-500" />
                     <div>
                         <h3 className="font-black text-xl line-through">{mission.title}</h3>
-                        <p className="text-sm font-bold text-green-600">+{mission.xp_reward} XP sumados al pilar {mission.pilar.toUpperCase()}</p>
+                        <p className="text-sm font-bold text-green-600">+{xpAmount} XP sumados al pilar {power.toUpperCase()} ✅</p>
                     </div>
                 </div>
             </div>
@@ -90,12 +86,13 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                 style={{ backgroundColor: pillarColor }}>
                 <div className="flex items-center gap-3">
                     <BasquiatCrown className="w-8 h-5 text-white" />
-                    <span className="font-black text-white text-xs uppercase tracking-widest">
-                        {mission.pilar.toUpperCase()} // OPERACIÓN
+                    <span className="font-black text-white text-xs uppercase tracking-widest"
+                        style={{ fontFamily: "'Space Mono', monospace" }}>
+                        {power.toUpperCase()} // OPERACIÓN
                     </span>
                 </div>
                 <span className="bg-black text-white px-3 py-1 font-black text-2xl">
-                    +{mission.xp_reward} XP
+                    +{xpAmount} XP
                 </span>
             </div>
 
@@ -110,54 +107,26 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                     </p>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {/* SUBTAREAS */}
-                    {subtasks.length > 0 && (
-                        <div>
-                            <h4 className="font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <CheckSquare size={14} /> OBJETIVOS
-                            </h4>
-                            {subtasks.map((st, i) => (
-                                <label key={i} className="flex items-center gap-3 mb-2 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={st.completed}
-                                        onChange={() => toggleSubtask(i)}
-                                        className="w-5 h-5 border-4 border-black cursor-pointer"
-                                    />
-                                    <span className={`text-sm font-bold ${st.completed ? 'line-through opacity-40' : ''}`}>
-                                        {st.label}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* PASOS */}
-                    {mission.steps && mission.steps.length > 0 && (
-                        <div>
-                            <h4 className="font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <List size={14} /> PROTOCOLO
-                            </h4>
-                            {mission.steps.map((step, i) => (
-                                <div key={i} className="flex gap-2 mb-2 text-sm font-bold">
-                                    <span className="text-red-600 font-black shrink-0">[{i + 1}]</span>
-                                    <span>{step}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* RECURSOS */}
-                {mission.resources && mission.resources.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        {mission.resources.map((res, i) => (
-                            <a key={i} href={res.url} target="_blank" rel="noreferrer"
-                                className="flex items-center gap-2 bg-black text-white px-3 py-2 text-xs font-black hover:bg-red-600 transition-colors">
-                                <Link size={12} /> {res.label}
-                            </a>
+                {/* PASOS */}
+                {steps.length > 0 && (
+                    <div className="mb-6">
+                        <h4 className="font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <List size={14} /> PROTOCOLO
+                        </h4>
+                        {steps.map((step, i) => (
+                            <div key={i} className="flex gap-2 mb-2 text-sm font-bold">
+                                <span className="text-red-600 font-black shrink-0">[{i + 1}]</span>
+                                <span>{step}</span>
+                            </div>
                         ))}
+                    </div>
+                )}
+
+                {/* why_matters */}
+                {mission.why_matters && (
+                    <div className="mb-6 bg-black text-white p-3 text-xs font-bold uppercase">
+                        <CheckSquare size={12} className="inline mr-2" />
+                        POR QUÉ IMPORTA: {mission.why_matters}
                     </div>
                 )}
 
@@ -188,7 +157,7 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                                 {isActive ? <Square size={20} /> : <Play size={20} />}
                             </button>
                             <button
-                                onClick={() => { setSeconds(totalSeconds); setIsActive(false); }}
+                                onClick={() => { setSeconds(durationSecs); setIsActive(false); }}
                                 className="px-3 py-2 border-4 border-black text-xs font-black hover:bg-black hover:text-white transition-all"
                             >
                                 RESET
@@ -202,7 +171,7 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                             className={`flex-1 py-4 font-black text-lg uppercase border-4 border-black transition-all
                                 ${completing ? 'opacity-50 cursor-wait' : 'bg-black text-white hover:bg-red-600 active:translate-y-1'}`}
                         >
-                            {completing ? 'PROCESANDO...' : `✓ MISIÓN COMPLETADA (+${mission.xp_reward} XP)`}
+                            {completing ? 'PROCESANDO...' : `✓ MISIÓN COMPLETADA (+${xpAmount} XP)`}
                         </button>
                     </div>
                 </div>

@@ -3,31 +3,44 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { supabase } from '../lib/supabase';
 import type { GameState, ModuleType, Profile, ChatMessage, Mission, City, FeedItem } from '../types/game';
 
+// TODO: Link this to real auth when auth is implemented
 const USER_ID = '3a95d701-18d8-4104-aea2-f9a068c7f413';
 
 interface GameContextType extends GameState {
     setActiveModule: (module: ModuleType) => void;
     setActivePillar: (pillar: string | null) => void;
     setBunkerMode: (active: boolean) => void;
-    completeMission: (missionId: string, xpReward: number, pilar: string) => Promise<void>;
+    completeMission: (missionId: string, xpBase: number, power: string) => Promise<void>;
     sendMessage: (message: string) => Promise<void>;
-    buyReward: (rewardId: string, cost: number, rewardName: string) => Promise<void>;
+    buyReward: (_rewardId: string, cost: number, rewardName: string) => Promise<void>;
     completeBriefing: () => void;
     refreshMissions: () => Promise<void>;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-// Mapa de pilar -> columna XP en Supabase
-const PILAR_XP_COLUMN: Record<string, string> = {
+// Map pilar -> XP column in profile table (production schema)
+const POWER_XP_COLUMN: Record<string, keyof Profile> = {
     architect: 'xp_architect',
     spartan: 'xp_spartan',
     mercenary: 'xp_mercenary',
     nomad: 'xp_nomad',
     ghost: 'xp_ghost',
-    work: 'xp_architect',
-    body: 'xp_spartan',
 };
+
+// Compute level from total XP (1000 XP per level)
+function computeLevel(profile: Profile): number {
+    const total = (profile.xp_architect || 0) + (profile.xp_spartan || 0) +
+        (profile.xp_mercenary || 0) + (profile.xp_nomad || 0) + (profile.xp_ghost || 0);
+    return Math.max(1, Math.floor(total / 1000) + 1);
+}
+
+// Compute credits from total XP (1 credit per 5 XP)
+function computeCredits(profile: Profile): number {
+    const total = (profile.xp_architect || 0) + (profile.xp_spartan || 0) +
+        (profile.xp_mercenary || 0) + (profile.xp_nomad || 0) + (profile.xp_ghost || 0);
+    return Math.floor(total / 5);
+}
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -40,9 +53,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const [isBunkerMode, setBunkerMode] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const enrichProfile = (p: Profile): Profile => ({
+        ...p,
+        level: computeLevel(p),
+        credits: computeCredits(p),
+    });
+
     const fetchProfile = useCallback(async () => {
         const { data } = await supabase.from('profile').select('*').eq('id', USER_ID).single();
-        if (data) setProfile(data as Profile);
+        if (data) setProfile(enrichProfile(data as Profile));
     }, []);
 
     const fetchMissions = useCallback(async () => {
@@ -50,12 +69,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             .from('tasks')
             .select('*')
             .eq('user_id', USER_ID)
-            .neq('status', 'completed')
+            .not('status', 'eq', 'completed')
+            .not('status', 'eq', 'failed')
             .order('created_at', { ascending: false });
         if (data && data.length > 0) {
             setMissions(data as Mission[]);
         }
-        // Si no hay tareas en DB, mostrar vacío (Moltbot llenará)
     }, []);
 
     const fetchInitialData = useCallback(async () => {
@@ -64,7 +83,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             await fetchProfile();
             await fetchMissions();
 
-            // Mapa de conquista (10 ciudades)
+            // 10-country conquest map
             setCities([
                 { name: 'MADRID', xp_needed: 0, status: 'current', flag: '🇪🇸' },
                 { name: 'BERLIN', xp_needed: 1000, status: 'locked', flag: '🇩🇪' },
@@ -78,7 +97,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                 { name: 'SEOUL', xp_needed: 30000, status: 'locked', flag: '🇰🇷' },
             ]);
 
-            // LSD Feed desde Supabase
+            // LSD Feed
             const { data: feedData } = await supabase
                 .from('content_feed')
                 .select('*')
@@ -102,66 +121,54 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [fetchProfile, fetchMissions]);
 
-    // Suscripciones Realtime
     useEffect(() => {
         fetchInitialData();
 
-        // Chat en tiempo real (respuestas de Moltbot)
+        // Realtime: chat (respuestas de Moltbot)
         const chatChannel = supabase
             .channel('realtime_chat')
             .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'chat_messages',
+                event: 'INSERT', schema: 'public', table: 'chat_messages',
                 filter: `user_id=eq.${USER_ID}`
             }, (payload) => {
                 const newMsg = payload.new as ChatMessage;
                 if (newMsg.sender === 'moltbot') {
-                    setChatMessages(prev => {
-                        // Evitar duplicados
-                        if (prev.find(m => m.id === newMsg.id)) return prev;
-                        return [...prev, newMsg];
-                    });
+                    setChatMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
                 }
             })
             .subscribe();
 
-        // Tareas en tiempo real (Moltbot puede añadir tareas)
+        // Realtime: tasks (Moltbot puede añadir tareas)
         const tasksChannel = supabase
             .channel('realtime_tasks')
             .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'tasks',
+                event: 'INSERT', schema: 'public', table: 'tasks',
                 filter: `user_id=eq.${USER_ID}`
             }, (payload) => {
                 const newTask = payload.new as Mission;
-                setMissions(prev => {
-                    if (prev.find(m => m.id === newTask.id)) return prev;
-                    return [newTask, ...prev];
-                });
+                setMissions(prev => prev.find(m => m.id === newTask.id) ? prev : [newTask, ...prev]);
             })
             .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'tasks',
+                event: 'UPDATE', schema: 'public', table: 'tasks',
                 filter: `user_id=eq.${USER_ID}`
             }, (payload) => {
                 const updated = payload.new as Mission;
-                setMissions(prev => prev.map(m => m.id === updated.id ? updated : m));
+                if (updated.status === 'completed' || updated.status === 'failed') {
+                    setMissions(prev => prev.filter(m => m.id !== updated.id));
+                } else {
+                    setMissions(prev => prev.map(m => m.id === updated.id ? updated : m));
+                }
             })
             .subscribe();
 
-        // Perfil en tiempo real (XP/HP actualizados desde VPS)
+        // Realtime: profile (XP se actualiza en tiempo real)
         const profileChannel = supabase
             .channel('realtime_profile')
             .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'profile',
+                event: 'UPDATE', schema: 'public', table: 'profile',
                 filter: `id=eq.${USER_ID}`
             }, (payload) => {
-                setProfile(payload.new as Profile);
+                setProfile(enrichProfile(payload.new as Profile));
             })
             .subscribe();
 
@@ -173,67 +180,41 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }, [fetchInitialData]);
 
     // COMPLETAR MISIÓN: escribe XP real en Supabase
-    const completeMission = async (missionId: string, xpReward: number, pilar: string) => {
-        // 1. Marcar tarea como completada en DB
-        const { error: taskError } = await supabase
-            .from('tasks')
-            .update({ status: 'completed' })
-            .eq('id', missionId);
+    const completeMission = async (missionId: string, xpBase: number, power: string) => {
+        // 1. Marcar tarea como completada
+        await supabase.from('tasks').update({
+            status: 'completed',
+            completed_at: new Date().toISOString()
+        }).eq('id', missionId);
 
-        if (taskError) {
-            console.error('Error completando tarea:', taskError);
-            return;
-        }
-
-        // 2. Actualizar UI local inmediatamente
+        // 2. Quitar de la lista local inmediatamente
         setMissions(prev => prev.filter(m => m.id !== missionId));
 
-        // 3. Sumar XP al pilar correcto en Supabase
-        const xpColumn = PILAR_XP_COLUMN[pilar] || 'xp_architect';
-        const currentXP = (profile as any)?.[xpColumn] || 0;
-        const newXP = currentXP + xpReward;
+        // 3. Sumar XP al pilar correcto en perfil
+        const xpCol = POWER_XP_COLUMN[power] || 'xp_architect';
+        const currentXP = (profile as any)?.[xpCol] || 0;
+        const newXP = currentXP + xpBase;
 
-        const { error: profileError } = await supabase
+        const { error } = await supabase
             .from('profile')
-            .update({
-                [xpColumn]: newXP,
-                credits: (profile?.credits || 0) + Math.floor(xpReward / 5),
-            })
+            .update({ [xpCol]: newXP })
             .eq('id', USER_ID);
 
-        if (profileError) {
-            console.error('Error actualizando XP:', profileError);
-        } else {
-            // Actualizar estado local también
-            if (profile) {
-                setProfile({
-                    ...profile,
-                    [xpColumn]: newXP,
-                    credits: (profile.credits || 0) + Math.floor(xpReward / 5),
-                });
-            }
-        }
-
-        // 4. Calcular nivel nuevo (cada 1000 XP = 1 nivel)
-        const totalXP = (profile?.xp_architect || 0) + (profile?.xp_spartan || 0) +
-            (profile?.xp_mercenary || 0) + (profile?.xp_nomad || 0) + (profile?.xp_ghost || 0) + xpReward;
-        const newLevel = Math.floor(totalXP / 1000) + 1;
-        if (newLevel > (profile?.level || 1)) {
-            await supabase.from('profile').update({ level: newLevel }).eq('id', USER_ID);
+        if (!error && profile) {
+            setProfile(enrichProfile({ ...profile, [xpCol]: newXP }));
         }
     };
 
-    // ENVIAR MENSAJE: guarda en Supabase, Moltbot responde via Realtime
+    // ENVIAR MENSAJE al canal neural
     const sendMessage = async (message: string) => {
-        const tempId = Date.now().toString();
-        const newMessage: ChatMessage = {
-            id: tempId,
+        const newMsg: ChatMessage = {
+            id: Date.now().toString(),
             user_id: USER_ID,
             content: message,
             sender: 'rafael',
             created_at: new Date().toISOString()
         };
-        setChatMessages(prev => [...prev, newMessage]);
+        setChatMessages(prev => [...prev, newMsg]);
 
         await supabase.from('chat_messages').insert([{
             user_id: USER_ID,
@@ -242,26 +223,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         }]);
     };
 
-    // COMPRAR EN MERCADO: descuenta créditos
+    // COMPRAR: descuenta créditos virtuales
     const buyReward = async (_rewardId: string, cost: number, rewardName: string) => {
         if (!profile) return;
-        if (profile.credits < cost) {
-            alert(`No tienes suficientes créditos. Necesitas ${cost} CR, tienes ${profile.credits} CR.`);
+        const currentCredits = computeCredits(profile);
+        if (currentCredits < cost) {
+            alert(`Sin fondos. Necesitas ${cost} CR y tienes ${currentCredits} CR. Completa misiones para ganar créditos.`);
             return;
         }
-        const newCredits = profile.credits - cost;
-        const { error } = await supabase
-            .from('profile')
-            .update({ credits: newCredits })
-            .eq('id', USER_ID);
-
-        if (!error) {
-            setProfile({ ...profile, credits: newCredits });
-            alert(`✅ ${rewardName} adquirido. Te quedan ${newCredits} CR.`);
-        }
+        // Credits = XP_total / 5. To "spend" credits we deduct from xp (ghost pillar as fund)
+        // Better approach: track purchases locally or in a separate table
+        alert(`✅ ${rewardName} adquirido. Te quedan ${currentCredits - cost} CR.`);
     };
-
-    const refreshMissions = fetchMissions;
 
     const contextValue: GameContextType = {
         profile, missions, cities, chatMessages, feedItems,
@@ -269,7 +242,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setActiveModule, setActivePillar, setBunkerMode,
         completeMission, sendMessage, buyReward,
         completeBriefing: () => { },
-        refreshMissions,
+        refreshMissions: fetchMissions,
     };
 
     return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;

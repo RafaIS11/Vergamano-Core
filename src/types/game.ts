@@ -1,56 +1,52 @@
 
-// VERGAMANO OS - Game Types V5.0
-// 5 Pillars: architect, spartan, mercenary, nomad, ghost
+// VERGAMANO OS - Game Types V5.0 (REAL SCHEMA)
 
-export type PilarType = 'architect' | 'spartan' | 'mercenary' | 'nomad' | 'ghost' | 'work' | 'body';
-export type MissionStatus = 'pending' | 'active' | 'auditing' | 'completed';
+export type PilarType = 'architect' | 'spartan' | 'mercenary' | 'nomad' | 'ghost';
+export type MissionStatus = 'pending' | 'active' | 'auditing' | 'completed' | 'failed';
 export type ModuleType = 'arena' | 'map' | 'lsd' | 'market' | 'neural';
 export type CityStatus = 'conquered' | 'current' | 'locked';
 export type SenderType = 'rafael' | 'moltbot';
-
-export interface Subtask {
-    label: string;
-    completed: boolean;
-}
-
-export interface Resource {
-    label: string;
-    url: string;
-}
 
 export interface Mission {
     id: string;
     user_id?: string;
     title: string;
     description?: string;
-    pilar: PilarType;
-    xp_reward: number;
+    why_matters?: string;
+    // DB uses 'power' for the pillar
+    power: PilarType;
+    pilar?: PilarType; // alias
+    xp_base: number;
+    xp_bonus?: number;
+    xp_reward?: number; // alias for xp_base
     status: MissionStatus;
     evidence_url?: string;
     steps?: string[];
-    subtasks?: Subtask[];
-    resources?: Resource[];
     timer_minutes?: number;
+    estimated_minutes?: number;
+    retry_count?: number;
+    generated_by?: string;
     started_at?: string;
+    completed_at?: string;
     created_at?: string;
 }
 
 export interface Profile {
     id: string;
     hp: number;
-    credits: number;
-    // Legacy XP columns (still in DB)
-    xp_work: number;
-    xp_nomad: number;
-    xp_body: number;
-    // V5 XP columns (5 pillars)
+    energy_level?: number;
+    streak_days?: number;
+    avatar_state?: string;
+    // V5 XP columns (already in production DB)
     xp_architect: number;
     xp_spartan: number;
     xp_mercenary: number;
+    xp_nomad: number;
     xp_ghost: number;
-    level: number;
-    status?: string;
-    avatar_url?: string;
+    // Derived
+    credits?: number;
+    level?: number;
+    last_activity_date?: string;
 }
 
 export interface ChatMessage {
