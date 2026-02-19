@@ -1,149 +1,179 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;700&family=Permanent+Marker&family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=IBM+Plex+Mono:wght@400;700&display=swap');
 
 :root {
-    --canvas-bg: #f2f0eb;
-    /* Color hueso más premium */
-    --ink-black: #121212;
-    --vergamano-red: #ff003c;
-    /* Rojo más vibrante */
-    --street-blue: #0055ff;
-    --premium-gold: #c5a059;
+    --canvas-bg: #ece9e0;
+    --ink-black: #080808;
+    --basquiat-red: #d00000;
+    --street-blue: #0030cf;
+    --marker-yellow: #ffdf00;
+    --spray-gray: #444444;
 }
 
 body {
     background-color: var(--canvas-bg);
     background-image:
         url("https://www.transparenttextures.com/patterns/canvas-orange.png"),
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+        radial-gradient(circle at 10% 20%, rgba(0, 0, 0, 0.05) 0%, transparent 40%);
     color: var(--ink-black);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     margin: 0;
     overflow-x: hidden;
-    letter-spacing: -0.02em;
 }
 
-/* TIPOGRAFÍA PREMIUM */
+/* TIPOGRAFÍA BASQUIAT / STREET */
 .game-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
+    font-family: 'Archivo Black', sans-serif;
     text-transform: uppercase;
-    letter-spacing: -0.06em;
-    line-height: 0.85;
-    color: var(--ink-black);
-}
-
-.bebas-font {
-    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: -2px;
+    line-height: 0.9;
+    filter: drop-shadow(4px 4px 0px var(--marker-yellow));
 }
 
 .marker-font {
     font-family: 'Permanent Marker', cursive;
 }
 
-/* AVATAR CENTRAL LIMPIO */
+/* AVATAR DE OPERADOR - ESTILO URBAN CARGO */
 .avatar-container {
-    width: 250px;
-    height: 250px;
+    width: 300px;
+    height: 300px;
     background: white;
-    border: 12px solid var(--ink-black);
+    border: 8px solid var(--ink-black);
     position: relative;
+    transform: rotate(-1deg);
+    box-shadow: 20px 20px 0px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(45deg, #eee, #eee 10px, #fff 10px, #fff 20px);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 30px 30px 0px rgba(0, 0, 0, 0.05);
-}
-
-.avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    font-size: 8rem;
+    filter: contrast(1.5) grayscale(1);
 }
 
 .hp-badge {
     position: absolute;
-    top: -20px;
-    right: -20px;
-    background: var(--vergamano-red);
+    top: 10px;
+    right: -10px;
+    background: var(--basquiat-red);
     color: white;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
+    font-family: 'Archivo Black', sans-serif;
     padding: 10px 20px;
     font-size: 1.5rem;
-    box-shadow: 10px 10px 0px var(--ink-black);
+    transform: rotate(5deg);
+    border: 4px solid var(--ink-black);
 }
 
-/* PILLARES INTERACTIVOS */
+/* PILLARES: TRAZO IRREGULAR */
 .pillar-card {
     background: white;
-    border: 4px solid var(--ink-black);
-    padding: 1.5rem;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 5px solid var(--ink-black);
+    padding: 20px;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
     position: relative;
-    overflow: hidden;
 }
 
 .pillar-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 12px 12px 0px var(--ink-black);
+    transform: rotate(1deg) scale(1.02);
+    box-shadow: 10px 10px 0px var(--ink-black);
 }
 
 .pillar-card-active {
-    background: var(--ink-black);
-    color: white;
-    box-shadow: 15px 15px 0px var(--vergamano-red);
+    background: var(--marker-yellow);
+    transform: scale(1.05) rotate(-2deg) !important;
+    box-shadow: 15px 15px 0px var(--ink-black);
 }
 
 .pillar-icon-box {
-    width: 60px;
-    height: 60px;
-    background: #f0f0f0;
-    border: 2px solid var(--ink-black);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    margin-bottom: 1rem;
+    font-size: 3rem;
+    margin-bottom: 10px;
+    filter: grayscale(1) contrast(1.2);
 }
 
-/* BOTONES NAVEGACIÓN (Clean & Bold) */
+/* NAVEGACIÓN: TICKET DE METRO / CALLE */
 .nav-tab {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.2rem;
-    padding: 12px 24px;
-    border: 3px solid var(--ink-black);
-    background: transparent;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 1.4rem;
+    padding: 15px 25px;
+    border: 4px solid var(--ink-black);
+    background: white;
     cursor: pointer;
-    transition: all 0.2s;
     text-transform: uppercase;
+    transition: all 0.1s;
 }
 
 .nav-tab-active {
     background: var(--ink-black);
     color: white;
+    transform: translateY(4px);
 }
 
-.nav-tab:hover:not(.nav-tab-active) {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-/* CHAT FIXES */
-.message-molt {
+/* TAREAS: FORMATO BRUTALISTA */
+.task-card {
+    border: 6px solid var(--ink-black);
     background: white;
-    color: var(--ink-black);
-    border: 4px solid var(--ink-black);
-    padding: 20px;
-    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-    font-size: 1.1rem;
-    max-width: 85%;
+    padding: 30px;
+    position: relative;
 }
 
-.message-rafa {
-    background: var(--ink-black);
-    color: white;
-    padding: 15px;
+.task-step-list {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-left: 10px solid var(--ink-black);
+}
+
+.task-step-item {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    font-weight: bold;
+}
+
+/* CHAT: ESTILO "BRO" CALLEJERO */
+.chat-window {
+    background: #111;
+    border: 8px solid var(--ink-black);
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.msg-molt {
+    align-self: flex-start;
+    background: white;
+    color: black;
+    padding: 15px 20px;
+    margin: 10px;
     max-width: 80%;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-left: 10px solid var(--marker-yellow);
+}
+
+.msg-rafa {
     align-self: flex-end;
+    background: var(--street-blue);
+    color: white;
+    padding: 15px 20px;
+    margin: 10px;
+    max-width: 80%;
+    font-weight: bold;
+}
+
+/* POMODORO: ESTILO RELOJ DE OBRA */
+.timer-box {
+    background: var(--ink-black);
+    color: var(--marker-yellow);
+    padding: 20px 40px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 4rem;
+    text-align: center;
+    border: 6px solid #333;
 }
