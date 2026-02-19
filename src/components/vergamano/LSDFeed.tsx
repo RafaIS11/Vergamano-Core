@@ -1,7 +1,6 @@
 
-import 'react';
 import { useGame } from '../../context/GameContext';
-import { Share2, Bookmark, BarChart3, ExternalLink } from 'lucide-react';
+import { Share2, Bookmark, BarChart3 } from 'lucide-react';
 
 export const LSDFeed = () => {
   const { feedItems } = useGame();
@@ -14,7 +13,7 @@ export const LSDFeed = () => {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {feedItems.map((item, i) => (
+        {feedItems.map((item) => (
           <div key={item.id} className="group relative flex flex-col bg-white border-4 border-black overflow-hidden shadow-[15px_15px_0px_rgba(0,0,0,0.1)] transition-all hover:-translate-y-2">
             {/* THUMBNAIL */}
             <div className="h-64 overflow-hidden relative border-b-4 border-black bg-gray-200">

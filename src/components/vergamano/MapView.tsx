@@ -1,7 +1,6 @@
 
-import 'react';
 import { useGame } from '../../context/GameContext';
-import { Lock, MapPin, Flag } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 const MapView = () => {
     const { cities } = useGame();
