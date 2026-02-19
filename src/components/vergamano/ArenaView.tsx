@@ -1,46 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  power: string;
-  xp_base: number;
-  status: string;
-}
+import { useGame } from '../../context/GameContext';
+import { TaskCard } from './TaskCard';
 
-export const ArenaView: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const { data } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('status', 'Todo')
-        .order('created_at', { ascending: false });
-      if (data) setTasks(data);
-    };
-    fetchTasks();
-  }, []);
+export const ArenaView = () => {
+  const { missions } = useGame();
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-6xl font-black italic border-b-8 border-black pb-4">ARENA_MISS_01</h2>
-      <div className="grid gap-4">
-        {tasks.map(task => (
-          <div key={task.id} className="border-8 border-black p-6 bg-white hover:bg-red-600 hover:text-white transition-colors group">
-            <div className="flex justify-between items-center mb-4">
-              <span className="bg-black text-white px-3 py-1 text-xs font-black group-hover:bg-white group-hover:text-black uppercase">{task.power}</span>
-              <span className="text-4xl font-black italic">+{task.xp_base} XP</span>
+    <div className="max-w-4xl mx-auto py-10">
+      <div className="mb-12">
+        <h2 className="basquiat-font text-6xl uppercase mb-2">LA_ARENA</h2>
+        <p className="typewriter text-lg bg-black text-white inline-block px-4 py-1">
+          OPERACIONES_ACTIVAS_CENTRO_DE_MANDO
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <section>
+          <h3 className="basquiat-font text-2xl mb-6 border-b-4 border-black inline-block">MISIONES_DISPONIBLES</h3>
+          {missions?.filter(m => m.status === 'pending').length === 0 ? (
+            <p className="font-mono italic text-gray-500">Moltbot está preparando nuevas órdenes...</p>
+          ) : (
+            missions?.filter(m => m.status === 'pending').map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))
+          )}
+        </section>
+
+        <section>
+          <h3 className="basquiat-font text-2xl mb-6 border-b-4 border-black inline-block">EN_CURSO</h3>
+          {missions?.filter(m => m.status === 'active').length === 0 ? (
+            <div className="basquiat-border p-10 text-center opacity-30">
+              <p className="basquiat-font text-xl">NO_HAY_OPERACIONES</p>
             </div>
-            <h3 className="text-4xl font-black uppercase mb-2">{task.title}</h3>
-            <p className="font-bold mb-4">{task.description}</p>
-            <button className="w-full border-4 border-black py-2 font-black uppercase group-hover:border-white">Enviar Prueba →</button>
-          </div>
-        ))}
+          ) : (
+            missions?.filter(m => m.status === 'active').map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))
+          )}
+        </section>
+      </div>
+
+      {/* Botón de Emergencia para hablar con Moltbot */}
+      <div className="mt-20 border-t-8 border-black pt-10">
+        <div className="banksy-card text-center text-2xl">
+          ¿PERDIDO? ENVÍA UN MENSAJE AL ENLACE NEURAL
+        </div>
       </div>
     </div>
   );
 };
+
+export default ArenaView;
