@@ -1,4 +1,5 @@
 import { useGame } from '../../context/GameContext';
+import { motion } from 'framer-motion';
 import { Bookmark, BarChart3, AlertTriangle } from 'lucide-react';
 import { InkSplatterSVG, ChaoticScribble } from './ScribbleElements';
 
@@ -57,13 +58,18 @@ export const LSDFeed = () => {
           const borderColor = isPriority ? '#ef4444' : '#000000';
 
           return (
-            <div
+            <motion.div
               key={item.id}
-              className="relative break-inside-avoid flex flex-col border-[4px] p-6 shadow-[10px_10px_0px_#000] hover:-translate-y-2 transition-transform"
+              className="relative break-inside-avoid flex flex-col border-[4px] p-6 shadow-[10px_10px_0px_#000] transition-all"
               style={{
                 transform: `rotate(${rotation})`,
                 backgroundColor: bgColor,
                 borderColor: borderColor
+              }}
+              whileHover={{
+                rotate: [rotation, '0deg', rotation],
+                scale: 1.02,
+                transition: { duration: 0.2, repeat: Infinity }
               }}
             >
               {/* Tape / Pin effect */}
@@ -112,7 +118,7 @@ export const LSDFeed = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

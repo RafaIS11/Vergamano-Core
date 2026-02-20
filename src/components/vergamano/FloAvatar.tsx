@@ -16,7 +16,8 @@ export function FloAvatar({ hp, className = '' }: FloAvatarProps) {
 
     // Intensity of corruption inversely proportional to HP
     const corruption = Math.max(0, 100 - hp) / 100; // 0 (healthy) -> 1 (glitched out)
-    const strokeWarp = 2 + (corruption * 4); // Stroke becomes thicker/messier as HP drops
+    const strokeWarp = 1.5 + (corruption * 4); // Stroke becomes thicker/messier as HP drops
+    const shiver = isDegraded ? [0, -1, 1, -0.5, 0] : [0, -0.2, 0.2, 0];
     const glitchIntensity = isDegraded ? corruption * 20 : 0;
 
     // Colors
@@ -62,8 +63,8 @@ export function FloAvatar({ hp, className = '' }: FloAvatarProps) {
                     stroke="#000"
                     strokeWidth={strokeWarp}
                     strokeLinejoin="round"
-                    animate={isDegraded ? { d: ["M28 102 Q35 85 60 87 Q85 85 92 102 L98 155 H22 Z", "M30 100 Q30 90 60 88 Q90 90 90 100 L95 155 H25 Z"] } : {}}
-                    transition={{ repeat: Infinity, duration: 0.3 }}
+                    animate={{ x: shiver }}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
                 />
 
                 {/* Collar */}
@@ -72,6 +73,8 @@ export function FloAvatar({ hp, className = '' }: FloAvatarProps) {
                     fill="none"
                     stroke="#000"
                     strokeWidth={strokeWarp * 0.8}
+                    animate={{ x: shiver }}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
                 />
 
                 {/* NECK */}
@@ -84,6 +87,8 @@ export function FloAvatar({ hp, className = '' }: FloAvatarProps) {
                     fill={skinColor}
                     stroke="#000"
                     strokeWidth={strokeWarp}
+                    animate={{ x: shiver }}
+                    transition={{ repeat: Infinity, duration: 0.5 }}
                 />
 
                 {/* HAIR: Reverts to messy afro dynamically in the void */}

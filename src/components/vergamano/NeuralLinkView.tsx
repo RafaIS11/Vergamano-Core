@@ -1,148 +1,78 @@
 
-import { useRef, useEffect, useState, type FormEvent } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../../context/GameContext';
-import { Send, Loader2 } from 'lucide-react';
-import { BasquiatCrown } from './ScribbleElements';
 
-const NeuralLinkView = () => {
+const NeuralLinkView: React.FC = () => {
     const { chatMessages, sendMessage } = useGame();
     const [input, setInput] = useState('');
-    const [sending, setSending] = useState(false);
-    const [waitingForMoltbot, setWaitingForMoltbot] = useState(false);
-    const bottomRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-    const lastSender = chatMessages.length > 0 ? chatMessages[chatMessages.length - 1].sender : null;
-
-    // When last message is from Rafael, show Moltbot typing indicator
     useEffect(() => {
-        if (lastSender === 'rafael') {
-            setWaitingForMoltbot(true);
-        } else {
-            setWaitingForMoltbot(false);
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [lastSender]);
+    }, [chatMessages]);
 
-    // Auto-scroll to bottom
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [chatMessages, waitingForMoltbot]);
-
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || sending) return;
-        const msg = input.trim();
+        if (!input.trim()) return;
+        sendMessage(input);
         setInput('');
-        setSending(true);
-        await sendMessage(msg);
-        setSending(false);
-        inputRef.current?.focus();
     };
 
     return (
-        <div className="flex flex-col h-[65vh] bg-black">
-            {/* Header */}
-            <div className="border-b-4 border-red-600 p-4 flex items-center gap-4">
-                <div className="w-10 h-6 text-red-600">
-                    <BasquiatCrown className="w-full h-full" />
-                </div>
-                <div>
-                    <h2 className="font-black text-red-600 uppercase tracking-widest"
-                        style={{ fontFamily: "'Space Mono', monospace" }}>
-                        ENLACE_NEURAL // MOLTBOT_V5.0
-                    </h2>
-                    <p className="text-xs text-green-500 font-bold font-mono">
-                        ● CANAL ABIERTO // RESPUESTA EN ~5 SEG
-                    </p>
+        <div className="flex flex-col h-[calc(100vh-280px)] bg-white text-black font-courier p-8 vergamano-border-thick m-8 vergamano-shadow-large">
+            {/* Terminal Header */}
+            <div className="flex items-center gap-4 border-b-4 border-black pb-4 mb-6">
+                <div className="w-8 h-8 bg-black" />
+                <h2 className="text-3xl font-black tracking-widest uppercase italic">ENLACE_NEURAL_v3.5</h2>
+                <div className="ml-auto flex gap-2">
+                    <span className="text-xs font-bold animate-pulse">ESCUCHANDO_FRECUENCIA_MOLTBOT...</span>
                 </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            {/* Messages Area */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-8 mb-6 pr-4">
                 {chatMessages.length === 0 && (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="font-black text-gray-600 text-center text-sm">
-                            Dile a Moltbot qué necesitas.<br />
-                            <span className="text-gray-500 font-mono">
-                                "ponme misiones para hoy" / "¿cómo voy?" / "qué debería hacer"
-                            </span>
-                        </p>
+                    <div className="text-center py-20 opacity-20 italic">
+                        --- NO HAY REGISTROS EN LA SESIÓN ACTUAL ---
                     </div>
                 )}
-
-                {chatMessages.map((msg) => {
-                    const isRafael = msg.sender === 'rafael';
-                    return (
-                        <div key={msg.id} className={`flex ${isRafael ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] relative ${isRafael
-                                ? 'bg-blue-600 text-white border-[3px] border-blue-400'
-                                : 'bg-black text-white border-[3px] border-red-600'
-                                }`}>
-                                {/* Sender badge */}
-                                <div className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest border-b-2 ${isRafael
-                                    ? 'border-blue-400 text-blue-200'
-                                    : 'border-red-600 text-red-500'
-                                    }`}>
-                                    {isRafael ? '> RAFAEL_IBARRA' : '> MOLTBOT_GM V5.0'}
-                                </div>
-                                <p className="px-4 py-3 font-bold text-sm leading-relaxed whitespace-pre-wrap">
-                                    {msg.content}
-                                </p>
-                                <div className="px-3 pb-1 text-[9px] opacity-30 font-mono">
-                                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''}
-                                </div>
-                            </div>
+                {chatMessages.map((msg, i) => (
+                    <div key={msg.id || i} className={`flex flex-col ${msg.sender === 'rafael' ? 'items-end' : 'items-start'}`}>
+                        <div className="flex gap-4 mb-1 opacity-40 text-[10px] font-black uppercase">
+                            <span>{msg.sender === 'rafael' ? 'RAFAEL_IBARRA' : 'MOLTBOT'}</span>
+                            <span>{new Date(msg.created_at).toLocaleTimeString()}</span>
                         </div>
-                    );
-                })}
+                        <div className={`max-w-[75%] p-6 vergamano-border relative
+                            ${msg.sender === 'rafael' ? 'bg-black text-white vergamano-shadow' : 'bg-white vergamano-shadow'}`}>
 
-                {/* Moltbot typing indicator */}
-                {waitingForMoltbot && (
-                    <div className="flex justify-start">
-                        <div className="bg-black text-white border-[3px] border-red-600 px-4 py-3 flex items-center gap-3">
-                            <Loader2 size={16} className="animate-spin text-red-600" />
-                            <span className="text-xs font-black text-red-500 uppercase tracking-wider">
-                                MOLTBOT procesando...
-                            </span>
-                            <span className="flex gap-1">
-                                {[0, 1, 2].map(i => (
-                                    <span key={i} className="w-2 h-2 bg-red-600 rounded-full animate-pulse"
-                                        style={{ animationDelay: `${i * 0.2}s` }} />
-                                ))}
-                            </span>
+                            {/* Decoración Táctica */}
+                            <div className={`absolute -top-2 -left-2 w-4 h-4 vergamano-border ${msg.sender === 'rafael' ? 'bg-white' : 'bg-black'}`} />
+
+                            <p className="text-xl font-bold leading-tight uppercase">
+                                {msg.sender === 'rafael' && <span className="mr-2">&gt;</span>}
+                                {msg.content}
+                            </p>
                         </div>
                     </div>
-                )}
-
-                <div ref={bottomRef} />
+                ))}
             </div>
 
-            {/* Input */}
-            <form onSubmit={handleSubmit}
-                className="border-t-4 border-red-600 p-4 flex gap-3">
+            {/* Input Area */}
+            <form onSubmit={handleSubmit} className="relative mt-auto">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black">&gt;</div>
                 <input
-                    ref={inputRef}
                     type="text"
                     value={input}
-                    onChange={e => setInput(e.target.value)}
-                    placeholder="Habla con Moltbot... pídele misiones, consejo, contexto"
-                    disabled={sending}
-                    className="flex-1 bg-gray-900 border-2 border-gray-700 text-white px-4 py-3 font-bold text-sm
-                        focus:outline-none focus:border-red-600 disabled:opacity-50 font-mono placeholder:text-gray-600"
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="INTRODUCE COMANDO O TRANSMITE A MOLTBOT..."
+                    className="w-full bg-white vergamano-border-thick p-6 pl-12 focus:outline-none focus:ring-8 focus:ring-black focus:ring-opacity-5 transition-all placeholder:opacity-40 uppercase font-black text-xl"
+                    autoFocus
                 />
-                <button
-                    type="submit"
-                    disabled={sending || !input.trim()}
-                    className="bg-red-600 text-white border-2 border-red-600 px-6 py-3 font-black uppercase
-                        hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2
-                        active:translate-y-1 transition-all"
-                >
-                    {sending
-                        ? <Loader2 size={16} className="animate-spin" />
-                        : <Send size={16} />
-                    }
-                    <span className="hidden sm:inline">ENVIAR</span>
-                </button>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+                    <div className="w-2 h-2 bg-black animate-ping" />
+                </div>
             </form>
         </div>
     );
