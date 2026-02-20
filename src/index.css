@@ -10,11 +10,15 @@
    ===================== */
 
 :root {
-  --canvas: #f4f1eb;
+  --canvas: #e8e0d0;
+  /* aged newsprint — warmer, more visible */
+  --canvas-dark: #1a1814;
+  /* brutalist dark */
   --ink: #0a0a0a;
   --blood: #ef4444;
   --electric: #3b82f6;
   --gold: #f59e0b;
+  --cream: #f4f1eb;
 }
 
 * {
@@ -23,11 +27,27 @@
 
 body {
   background-color: var(--canvas);
+  /* Aggressive newspaper grain + aged paper look */
+  background-image:
+    /* Fine noise grain */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E"),
+    /* Subtle crosshatch lines */
+    repeating-linear-gradient(45deg,
+      transparent,
+      transparent 20px,
+      rgba(0, 0, 0, 0.015) 20px,
+      rgba(0, 0, 0, 0.015) 21px),
+    repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 20px,
+      rgba(0, 0, 0, 0.01) 20px,
+      rgba(0, 0, 0, 0.01) 21px);
   font-family: 'Space Mono', monospace;
   color: var(--ink);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 /* =====================

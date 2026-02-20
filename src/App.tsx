@@ -10,13 +10,13 @@ import { FloAvatar } from './components/vergamano/FloAvatar';
 import { TheVoid } from './components/vergamano/effects/TheVoid';
 import { motion } from 'framer-motion';
 
-// CANONICAL PILLARS - colors from the original concept
+// CANONICAL PILLARS — each has a real generated artwork image
 const PILARS = [
-  { id: 'architect', label: 'ARQUITECTO', icon: '🏛️', xpKey: 'xp_architect', color: '#3b82f6', description: 'BUILD' },
-  { id: 'spartan', label: 'ESPARTANO', icon: '⚔️', xpKey: 'xp_spartan', color: '#ef4444', description: 'BODY' },
-  { id: 'mercenary', label: 'MERCENARIO', icon: '💰', xpKey: 'xp_mercenary', color: '#22c55e', description: 'MONEY' },
-  { id: 'nomad', label: 'NÓMADA', icon: '🧭', xpKey: 'xp_nomad', color: '#f59e0b', description: 'MOVE' },
-  { id: 'ghost', label: 'FANTASMA', icon: '👻', xpKey: 'xp_ghost', color: '#8b5cf6', description: 'MIND' },
+  { id: 'architect', label: 'ARQUITECTO', img: '/pillars/architect.png', xpKey: 'xp_architect', color: '#3b82f6', description: 'BUILD' },
+  { id: 'spartan', label: 'ESPARTANO', img: '/pillars/spartan.png', xpKey: 'xp_spartan', color: '#ef4444', description: 'BODY' },
+  { id: 'mercenary', label: 'MERCENARIO', img: '/pillars/mercenary.png', xpKey: 'xp_mercenary', color: '#22c55e', description: 'MONEY' },
+  { id: 'nomad', label: 'NÓMADA', img: '/pillars/nomad.png', xpKey: 'xp_nomad', color: '#f59e0b', description: 'MOVE' },
+  { id: 'ghost', label: 'FANTASMA', img: '/pillars/ghost.png', xpKey: 'xp_ghost', color: '#8b5cf6', description: 'MIND' },
 ];
 
 const MODULES = [
@@ -67,9 +67,9 @@ function App() {
         <header className="mb-10">
           <div className="flex items-start gap-6 mb-6">
 
-            {/* Avatar Column — left side */}
-            <div className="w-36 flex-shrink-0 hidden md:block">
-              <FloAvatar hp={hpPercent} className="w-full" />
+            {/* Avatar Column — large enough to make an impact */}
+            <div className="w-44 md:w-52 flex-shrink-0 hidden md:block">
+              <FloAvatar hp={hpPercent} totalXP={totalXP} className="w-full" />
             </div>
 
             {/* Title + Stats */}
@@ -128,33 +128,52 @@ function App() {
             </div>
           </div>
 
-          {/* PILLAR SELECTOR */}
+          {/* PILLAR SELECTOR — with artwork */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
             {PILARS.map(p => {
               const xp = (profile as any)?.[p.xpKey] ?? 0;
               const isActive = activePillar === p.id;
-              const xpInLevel = xp % 1000;
+              const xpInLevel = xp % 500;
               return (
                 <motion.button
                   key={p.id}
                   onClick={() => setActivePillar(isActive ? null : p.id)}
                   whileHover={{ y: -2 }}
                   whileTap={{ y: 1 }}
-                  className="border-[4px] border-black p-3 text-left transition-all relative overflow-hidden"
+                  className="border-[4px] border-black text-left transition-all relative overflow-hidden"
                   style={{
                     backgroundColor: isActive ? p.color : '#fff',
                     boxShadow: isActive ? '5px 5px 0 black' : '3px 3px 0 rgba(0,0,0,0.15)',
                   }}
                 >
-                  <div className="text-2xl mb-1">{p.icon}</div>
-                  <div className="font-black text-[9px] uppercase tracking-wider mb-1" style={{ color: isActive ? '#fff' : '#000' }}>
-                    {p.label}
+                  {/* Pillar artwork image */}
+                  <div className="relative overflow-hidden" style={{ height: '120px' }}>
+                    <img
+                      src={p.img}
+                      alt={p.label}
+                      className="w-full h-full object-cover"
+                      style={{
+                        filter: isActive ? 'brightness(0.8) contrast(1.2)' : 'grayscale(20%)',
+                        transition: 'filter 0.3s',
+                      }}
+                    />
+                    {/* Overlay label */}
+                    <div
+                      className="absolute inset-0 flex flex-col justify-end p-2"
+                      style={{ background: `linear-gradient(to top, ${isActive ? p.color + 'DD' : 'rgba(0,0,0,0.5)'} 0%, transparent 60%)` }}
+                    >
+                      <div className="font-black text-[9px] uppercase tracking-wider text-white">{p.label}</div>
+                      <div className="font-black text-xs text-white" style={{ fontFamily: "'Space Mono', monospace" }}>
+                        {xp.toLocaleString()} <span className="text-[8px]">XP</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="font-black text-sm" style={{ fontFamily: "'Space Mono', monospace", color: isActive ? '#fff' : '#000' }}>
-                    {xp.toLocaleString()} <span className="text-[8px]">XP</span>
-                  </div>
-                  <div className="h-1.5 border border-current mt-1.5" style={{ opacity: 0.5 }}>
-                    <div className="h-full transition-all duration-700" style={{ width: `${(xpInLevel / 10)}%`, backgroundColor: isActive ? '#fff' : p.color }} />
+                  {/* XP progress bar */}
+                  <div className="h-1.5 border-t-2 border-black">
+                    <div
+                      className="h-full transition-all duration-700"
+                      style={{ width: `${Math.min(100, (xpInLevel / 5))}%`, backgroundColor: p.color }}
+                    />
                   </div>
                 </motion.button>
               );

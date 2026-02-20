@@ -10,9 +10,12 @@ const ArenaView: React.FC = () => {
 
     if (!profile) return <div className="p-20 text-4xl font-black animate-pulse">CARGANDO_BIO_STATUS...</div>;
 
-    // Filter missions if a pillar is selected
+    const totalXP = (profile?.xp_architect || 0) + (profile?.xp_spartan || 0) +
+        (profile?.xp_mercenary || 0) + (profile?.xp_nomad || 0) + (profile?.xp_ghost || 0);
+
+    // Filter missions using both 'power' and 'pilar' fields
     const filteredMissions = activePillar
-        ? missions.filter(m => m.pilar === activePillar)
+        ? missions.filter(m => (m.power === activePillar || m.pilar === activePillar))
         : missions;
 
     return (
@@ -24,9 +27,8 @@ const ArenaView: React.FC = () => {
                     <ChaoticScribble className="opacity-20" />
                 </div>
 
-                {/* Avatar Bio-Reactivo de Cabeza (FloAvatar) */}
-                <div className="relative w-full aspect-square flex items-center justify-center mb-10">
-                    <FloAvatar hp={profile.hp} className="w-64 h-64" />
+                <div className="relative w-full flex items-center justify-center mb-8">
+                    <FloAvatar hp={profile.hp} totalXP={totalXP} className="w-full max-w-[220px]" />
                 </div>
 
                 <div className="text-center relative z-10 bg-white p-4 vergamano-border vergamano-shadow w-full">
