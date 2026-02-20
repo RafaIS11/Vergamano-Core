@@ -87,6 +87,9 @@ function App() {
                   }}>
                   VERGAMANO
                 </h1>
+                <div className="bg-red-600 text-white px-2 py-1 font-black text-xs rotate-[-1deg] absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap border-2 border-black z-20">
+                  NANO BANANA ENGINE // V4.0 ACTIVATED
+                </div>
                 <div className="flex justify-center gap-1 mt-1">
                   {[...Array(8)].map((_, i) => (
                     <div key={i} className="h-1 flex-1 bg-black opacity-30" />
@@ -94,7 +97,7 @@ function App() {
                 </div>
                 <p className="font-black text-sm tracking-[0.4em] uppercase mt-2 opacity-60"
                   style={{ fontFamily: "'Space Mono', monospace" }}>
-                  PROTOCOLO SOBERANO // OS V5.0
+                  PROTOCOLO SOBERANO // OS V5.0 // ULTIMATE ALPHA
                 </p>
               </div>
               <div className="w-20 h-12 mt-2 scale-x-[-1]">
