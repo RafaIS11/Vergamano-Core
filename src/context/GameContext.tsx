@@ -179,61 +179,122 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         };
     }, [fetchInitialData]);
 
-    // COMPLETAR MISIÓN: escribe XP real en Supabase
+    // COMPLETAR MISIÓN: Optimistic UI Updates (Zero Latency)
     const completeMission = async (missionId: string, xpBase: number, power: string) => {
-        // 1. Marcar tarea como completada
-        await supabase.from('tasks').update({
-            status: 'completed',
-            completed_at: new Date().toISOString()
-        }).eq('id', missionId);
+        // --- V4.0 OPTIMISTIC UPDATE ---
 
-        // 2. Quitar de la lista local inmediatamente
+        // 1. Guardar estado previo para posible rollback
+        const previousMissions = [...missions];
+        const previousProfile = profile ? { ...profile } : null;
+
+        // 2. Modificar el estado local INMEDIATAMENTE
         setMissions(prev => prev.filter(m => m.id !== missionId));
 
-        // 3. Sumar XP al pilar correcto en perfil
         const xpCol = POWER_XP_COLUMN[power] || 'xp_architect';
         const currentXP = (profile as any)?.[xpCol] || 0;
         const newXP = currentXP + xpBase;
 
-        const { error } = await supabase
-            .from('profile')
-            .update({ [xpCol]: newXP })
-            .eq('id', USER_ID);
-
-        if (!error && profile) {
+        if (profile) {
             setProfile(enrichProfile({ ...profile, [xpCol]: newXP }));
+        }
+
+        // --- BACKGROUND DB UPDATE ---
+        try {
+            // Actualizar Tarea
+            const { error: taskError } = await supabase.from('tasks').update({
+                status: 'completed',
+                completed_at: new Date().toISOString()
+            }).eq('id', missionId);
+
+            if (taskError) throw taskError;
+
+            // Actualizar Perfil
+            const { error: profileError } = await supabase
+                .from('profile')
+                .update({ [xpCol]: newXP })
+                .eq('id', USER_ID);
+
+            if (profileError) throw profileError;
+
+        } catch (err) {
+            console.error("V4.0: Error en Optimistic Update (Rollback)", err);
+            // ROLLBACK
+            setMissions(previousMissions);
+            if (previousProfile) {
+                setProfile(enrichProfile(previousProfile));
+            }
+            // Emitir evento para el toast
+            alert('Fallo al sincronizar V4.0. Rollback ejecutado.');
         }
     };
 
-    // ENVIAR MENSAJE al canal neural
+    // ENVIAR MENSAJE: Optimistic UI Updates
     const sendMessage = async (message: string) => {
+        // --- V4.0 OPTIMISTIC UPDATE ---
+        const previousMessages = [...chatMessages];
+
         const newMsg: ChatMessage = {
-            id: Date.now().toString(),
+            id: Date.now().toString(), // ID temporal
             user_id: USER_ID,
             content: message,
             sender: 'rafael',
             created_at: new Date().toISOString()
         };
+
+        // Renderizar inmediatamente
         setChatMessages(prev => [...prev, newMsg]);
 
-        await supabase.from('chat_messages').insert([{
-            user_id: USER_ID,
-            content: message,
-            sender: 'rafael'
-        }]);
+        // --- BACKGROUND DB UPDATE ---
+        try {
+            const { error } = await supabase.from('chat_messages').insert([{
+                user_id: USER_ID,
+                content: message,
+                sender: 'rafael'
+            }]);
+            if (error) throw error;
+        } catch (err) {
+            console.error("V4.0: Error enviando mensaje (Rollback)", err);
+            setChatMessages(previousMessages);
+        }
     };
 
-    // COMPRAR: descuenta créditos virtuales
+    // COMPRAR: Optimistic UI Updates
     const buyReward = async (_rewardId: string, cost: number, rewardName: string) => {
         if (!profile) return;
+
         const currentCredits = computeCredits(profile);
         if (currentCredits < cost) {
-            alert(`Sin fondos. Necesitas ${cost} CR y tienes ${currentCredits} CR. Completa misiones para ganar créditos.`);
+            alert(`SISTEMA BLOQUEADO. Faltan créditos. Tienes ${currentCredits} CR. Mueve el culo.`);
             return;
         }
-        // Credits = XP_total / 5. To "spend" credits we deduct from xp (ghost pillar as fund)
-        // Better approach: track purchases locally or in a separate table
-        alert(`✅ ${rewardName} adquirido. Te quedan ${currentCredits - cost} CR.`);
+
+        // --- V4.0 OPTIMISTIC UPDATE ---
+        const previousProfile = { ...profile };
+        const costInXp = cost * 5; // El ratio es 1 CR = 5 XP. Lo restamos del sobrante.
+
+        // En V3.5 el costo se restaba del Pilar que más XP tiene o proporcionalmente.
+        // Para simplificar y mantener la velocidad 4.0, se lo descontamos al Ghost (Fund).
+        const currentGhostXP = profile.xp_ghost || 0;
+        const newGhostXP = currentGhostXP - costInXp;
+
+        setProfile(enrichProfile({ ...profile, xp_ghost: newGhostXP }));
+
+        // Feedback inmediato (podemos cambiar el alert por el sonido crudo después)
+        console.log(`[V4.0] Optimistic Buy: ${rewardName}. Re-syncing DB...`);
+
+        // --- BACKGROUND DB UPDATE ---
+        try {
+            const { error } = await supabase
+                .from('profile')
+                .update({ xp_ghost: newGhostXP })
+                .eq('id', USER_ID);
+
+            if (error) throw error;
+        } catch (err) {
+            console.error("V4.0: Error comprando reward (Rollback)", err);
+            setProfile(enrichProfile(previousProfile));
+            alert('Sincronización fallida. Rollback de créditos.');
+        }
     };
 
     const contextValue: GameContextType = {

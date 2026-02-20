@@ -1,70 +1,125 @@
-
 import { useGame } from '../../context/GameContext';
-import { Share2, Bookmark, BarChart3 } from 'lucide-react';
+import { Bookmark, BarChart3, AlertTriangle } from 'lucide-react';
+import { InkSplatterSVG, ChaoticScribble } from './ScribbleElements';
+
+const PILAR_KEYS = {
+  architect: 'xp_architect',
+  spartan: 'xp_spartan',
+  mercenary: 'xp_mercenary',
+  nomad: 'xp_nomad',
+  ghost: 'xp_ghost'
+} as const;
 
 export const LSDFeed = () => {
-  const { feedItems } = useGame();
+  const { feedItems, profile } = useGame();
+
+  // 1. Determine Weakest Pillar for the Contextual Ghost Logic
+  let weakestPillar = 'ghost'; // Default fallback
+  if (profile) {
+    let minXp = Infinity;
+    Object.entries(PILAR_KEYS).forEach(([pillar, key]) => {
+      const xp = (profile as any)[key] || 0;
+      if (xp < minXp) {
+        minXp = xp;
+        weakestPillar = pillar;
+      }
+    });
+  }
+
+  // 2. Sort Feed: Prioritize weakest pillar intel
+  const sortedFeed = [...feedItems].sort((a, b) => {
+    const aIsPriority = a.category?.toLowerCase() === weakestPillar;
+    const bIsPriority = b.category?.toLowerCase() === weakestPillar;
+    if (aIsPriority && !bIsPriority) return -1;
+    if (!aIsPriority && bIsPriority) return 1;
+    // Fallback to date
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
 
   return (
-    <div className="space-y-12">
-      <h2 className="game-title text-6xl border-b-8 border-black pb-4">LSD_FEED_INTEL</h2>
-      <p className="typewriter text-xl opacity-60 max-w-2xl mb-12">
-        DIK: DIGITAL_INTELLIGENCE_KERNEL. Curated signals for the sovereign individual. Scan, extract, apply.
-      </p>
+    <div className="space-y-16">
+      <header className="mb-12 border-b-[8px] border-black pb-8 relative">
+        <div className="absolute -top-10 -right-4 w-32 h-32 opacity-20 pointer-events-none">
+          <ChaoticScribble />
+        </div>
+        <h2 className="font-black text-6xl uppercase leading-none" style={{ fontFamily: "'Space Mono', monospace" }}>LSD_INTEL</h2>
+        <div className="mt-4 bg-red-600 text-white p-4 font-black flex items-center gap-4 text-xl border-4 border-black">
+          <AlertTriangle size={32} />
+          <span>PRIORITY OVERRIDE: PILAR <span className="underline">{weakestPillar.toUpperCase()}</span> REQUIRES IMMEDIATE REINFORCEMENT.</span>
+        </div>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {feedItems.map((item) => (
-          <div key={item.id} className="group relative flex flex-col bg-white border-4 border-black overflow-hidden shadow-[15px_15px_0px_rgba(0,0,0,0.1)] transition-all hover:-translate-y-2">
-            {/* THUMBNAIL */}
-            <div className="h-64 overflow-hidden relative border-b-4 border-black bg-gray-200">
-              {item.thumbnail_url ? (
-                <img src={item.thumbnail_url} alt={item.title} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-8xl grayscale opacity-20">📡</div>
+      <div className="columns-1 md:columns-2 gap-8 space-y-8">
+        {sortedFeed.map((item, index) => {
+          const isPriority = item.category?.toLowerCase() === weakestPillar;
+          const rotation = (index % 2 === 0 ? '-1deg' : '1.5deg');
+          const bgColor = isPriority ? '#fff5f5' : '#ffffff';
+          const borderColor = isPriority ? '#ef4444' : '#000000';
+
+          return (
+            <div
+              key={item.id}
+              className="relative break-inside-avoid flex flex-col border-[4px] p-6 shadow-[10px_10px_0px_#000] hover:-translate-y-2 transition-transform"
+              style={{
+                transform: `rotate(${rotation})`,
+                backgroundColor: bgColor,
+                borderColor: borderColor
+              }}
+            >
+              {/* Tape / Pin effect */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-yellow-200/80 border-2 border-black rotate-3 z-10"></div>
+
+              {/* Ink Splatter BG for Priority items */}
+              {isPriority && (
+                <div className="absolute top-10 right-4 w-20 h-20 opacity-10 pointer-events-none">
+                  <InkSplatterSVG variant={1} />
+                </div>
               )}
-              <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 font-bold text-xs">
-                {item.category?.toUpperCase() || 'GENERAL_SIGNAL'}
+
+              {/* THUMBNAIL */}
+              <div className={`h-48 overflow-hidden relative border-[3px] border-black mb-6 ${isPriority ? 'grayscale-0' : 'grayscale'}`}>
+                {item.thumbnail_url ? (
+                  <img src={item.thumbnail_url} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center font-black text-4xl opacity-20">NO_IMG</div>
+                )}
+                <div className={`absolute top-2 left-2 px-3 py-1 font-black text-xs uppercase border-2 border-black ${isPriority ? 'bg-red-600 text-white' : 'bg-black text-white'}`}>
+                  {item.category || 'UNAFFILIATED'}
+                </div>
+              </div>
+
+              {/* CONTENT */}
+              <div className="space-y-4 relative z-10">
+                <h3 className="font-black text-2xl uppercase leading-tight" style={{ fontFamily: "'Space Mono', monospace" }}>{item.title}</h3>
+
+                <div className="bg-gray-50 p-4 border-l-[4px] border-black relative">
+                  <h4 className="font-black text-[10px] mb-2 opacity-50 uppercase tracking-widest">// APPLICATION_VECTOR</h4>
+                  <p className="font-bold text-sm leading-relaxed">{item.how_to_apply || 'Extract signals manually.'}</p>
+                </div>
+
+                <p className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                  {item.source ? `SRC: ${item.source} // ` : ''}
+                  {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'TIME_UNKNOWN'}
+                </p>
+
+                {/* ACTIONS */}
+                <div className="flex gap-2 pt-4">
+                  <button className="flex-1 bg-black text-white py-3 font-black text-xs uppercase border-2 border-black hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2">
+                    <BarChart3 size={16} /> EXTRACT
+                  </button>
+                  <button className="px-4 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors">
+                    <Bookmark size={16} />
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* CONTENT */}
-            <div className="p-8 space-y-6">
-              <h3 className="marker-font text-4xl leading-tight">{item.title}</h3>
-
-              <div className="bg-gray-100 p-6 border-l-8 border-black">
-                <h4 className="font-black text-sm mb-2 opacity-40">// HOW_TO_APPLY_TO_PROGRESS</h4>
-                <p className="font-bold leading-relaxed">{item.how_to_apply || 'No implementation details provided. Analyze manually.'}</p>
-              </div>
-
-              <p className="text-sm opacity-60 leading-relaxed line-clamp-3">
-                {item.source ? `SOURCE: ${item.source} // ` : ''}
-                {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'TIME_UNKNOWN'}
-              </p>
-
-              {/* ACTIONS */}
-              <div className="flex gap-4 pt-4 border-t-2 border-black">
-                <button className="p-4 border-2 border-black hover:bg-black hover:text-white transition-all">
-                  <Bookmark size={20} />
-                </button>
-                <button className="p-4 border-2 border-black hover:bg-black hover:text-white transition-all">
-                  <Share2 size={20} />
-                </button>
-                <button className="flex-1 bg-black text-white p-4 font-bold flex items-center justify-center gap-3 hover:bg-red-600 transition-all">
-                  <BarChart3 size={20} /> VIEW_FULL_INTEL
-                </button>
-              </div>
-            </div>
-
-            {/* DECORATIVE NUMBERS */}
-            <span className="absolute bottom-2 right-4 text-xs font-black opacity-10">
-              0x{Math.random().toString(16).slice(2, 8).toUpperCase()}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="text-center p-20 opacity-20">
-        <p className="marker-font text-5xl">END_OF_SIGNALS_RELOADING...</p>
+      <div className="text-center py-20 opacity-30">
+        <ChaoticScribble className="w-32 h-32 mx-auto mb-4" />
+        <p className="font-black text-2xl uppercase" style={{ fontFamily: "'Space Mono', monospace" }}>END_OF_SIGNALS</p>
       </div>
     </div>
   );

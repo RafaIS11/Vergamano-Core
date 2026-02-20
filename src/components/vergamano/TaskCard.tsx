@@ -4,6 +4,11 @@ import type { Mission } from '../../types/game';
 import { useGame } from '../../context/GameContext';
 import { CheckSquare, List, Play, Square, Trophy } from 'lucide-react';
 import { InkSplatterSVG, BasquiatCrown } from './ScribbleElements';
+import useSound from 'use-sound';
+import { motion } from 'framer-motion';
+
+// Base64 short mechanical crunch placeholder for Audio Brutalism
+const CRUNCH_SOUND = 'data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
 
 export const TaskCard = ({ mission }: { mission: Mission }) => {
     const { completeMission } = useGame();
@@ -12,6 +17,10 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
     const [isActive, setIsActive] = useState(false);
     const [isCompleted, setIsCompleted] = useState(mission.status === 'completed');
     const [completing, setCompleting] = useState(false);
+
+    // Audio Brutalism Hook
+    const [playCrunch] = useSound(CRUNCH_SOUND, { volume: 0.8 });
+
     const steps: string[] = mission.steps || [];
 
     const progress = ((durationSecs - seconds) / durationSecs) * 100;
@@ -37,6 +46,10 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
     const handleComplete = async () => {
         if (isCompleted || completing) return;
         setCompleting(true);
+        // Play Audio Brutalism crunch instantly
+        playCrunch();
+
+        // Optimistic UI updates instantly
         await completeMission(mission.id, xpAmount, power);
         setIsCompleted(true);
         setIsActive(false);
@@ -56,21 +69,36 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
 
     if (isCompleted) {
         return (
-            <div className="relative border-[6px] border-black p-6 opacity-60 bg-gray-50" style={{ borderStyle: 'dashed' }}>
+            <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.6 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative border-[6px] border-black p-6 bg-gray-50" style={{ borderStyle: 'dashed' }}
+            >
+                {/* Framer Motion Liquid Ink Splatter Effect  */}
+                <motion.div
+                    initial={{ y: -50, opacity: 0, scale: 0.5 }}
+                    animate={{ y: 0, opacity: 0.4, scale: 2 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.1 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
+                >
+                    <InkSplatterSVG variant={2} />
+                </motion.div>
+
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <svg viewBox="0 0 200 60" className="w-full opacity-30">
                         <path d="M10 30 L190 30" stroke="black" strokeWidth="8" strokeLinecap="round" />
                         <path d="M5 25 L195 35" stroke="black" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
                     </svg>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 relative z-10">
                     <Trophy size={32} className="text-yellow-500" />
                     <div>
                         <h3 className="font-black text-xl line-through">{mission.title}</h3>
                         <p className="text-sm font-bold text-green-600">+{xpAmount} XP sumados al pilar {power.toUpperCase()} ✅</p>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 

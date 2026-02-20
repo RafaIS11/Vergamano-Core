@@ -7,6 +7,7 @@ import { LSDFeed } from './components/vergamano/LSDFeed';
 import NeuralLinkView from './components/vergamano/NeuralLinkView';
 import { BasquiatCrown, InkSplatterSVG, ChaoticScribble, ScratchMarks } from './components/vergamano/ScribbleElements';
 import { FloAvatar } from './components/vergamano/FloAvatar';
+import { TheVoid } from './components/vergamano/effects/TheVoid';
 
 const PILARS = [
   { id: 'architect', label: 'ARQUITECTO', icon: '🏛️', xpKey: 'xp_architect', color: '#3b82f6' },
@@ -62,6 +63,8 @@ function App() {
           <ScratchMarks />
         </div>
       </div>
+
+      <TheVoid />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8">
 
