@@ -28,18 +28,18 @@ const POWER_XP_COLUMN: Record<string, keyof Profile> = {
     ghost: 'xp_ghost',
 };
 
-// Compute level from total XP (1000 XP per level)
+// Compute level from total XP (500 XP per level — feels real and earnable)
 function computeLevel(profile: Profile): number {
     const total = (profile.xp_architect || 0) + (profile.xp_spartan || 0) +
         (profile.xp_mercenary || 0) + (profile.xp_nomad || 0) + (profile.xp_ghost || 0);
-    return Math.max(1, Math.floor(total / 1000) + 1);
+    return Math.max(1, Math.floor(total / 500) + 1);
 }
 
-// Compute credits from total XP (1 credit per 5 XP)
+// Compute credits from total XP (1 CR per 10 XP — harder economy, market feels earned)
 function computeCredits(profile: Profile): number {
     const total = (profile.xp_architect || 0) + (profile.xp_spartan || 0) +
         (profile.xp_mercenary || 0) + (profile.xp_nomad || 0) + (profile.xp_ghost || 0);
-    return Math.floor(total / 5);
+    return Math.floor(total / 10);
 }
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
@@ -83,9 +83,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             await fetchProfile();
             await fetchMissions();
 
-            // 10-country conquest route
+            // THE CANONICAL 10-CITY CONQUEST ROUTE — DO NOT CHANGE
             setCities([
-                { name: 'CARACAS', xp_needed: 0, status: 'current', flag: '🇻🇪' },
+                { name: 'CARACAS', xp_needed: 0, status: 'conquered', flag: '🇻🇪' },
                 { name: 'MADRID', xp_needed: 1000, status: 'locked', flag: '🇪🇸' },
                 { name: 'BRUSELAS', xp_needed: 2500, status: 'locked', flag: '🇧🇪' },
                 { name: 'COPENHAGUE', xp_needed: 5000, status: 'locked', flag: '🇩🇰' },

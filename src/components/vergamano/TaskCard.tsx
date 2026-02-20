@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import type { Mission } from '../../types/game';
 import { useGame } from '../../context/GameContext';
-import { CheckSquare, List, Play, Square, Trophy } from 'lucide-react';
+import { CheckSquare, List, Play, Square, Trophy, Lock } from 'lucide-react';
 import { InkSplatterSVG, BasquiatCrown } from './ScribbleElements';
 import useSound from 'use-sound';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Base64 short mechanical crunch placeholder for Audio Brutalism
 const CRUNCH_SOUND = 'data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
@@ -17,6 +16,9 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
     const [isActive, setIsActive] = useState(false);
     const [isCompleted, setIsCompleted] = useState(mission.status === 'completed');
     const [completing, setCompleting] = useState(false);
+    const [showEvidenceModal, setShowEvidenceModal] = useState(false);
+    const [evidenceText, setEvidenceText] = useState('');
+
 
     // Audio Brutalism Hook
     const [playCrunch] = useSound(CRUNCH_SOUND, { volume: 0.8 });
@@ -45,16 +47,25 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
 
     const handleComplete = async () => {
         if (isCompleted || completing) return;
-        setCompleting(true);
-        // Play Audio Brutalism crunch instantly
-        playCrunch();
+        // ANTI-CHEAT: require evidence
+        setShowEvidenceModal(true);
+    };
 
-        // Optimistic UI updates instantly
+    const handleSubmitEvidence = async () => {
+        if (!evidenceText.trim()) {
+            alert('PROTOCOLO: Demuestra que lo hiciste. Sin prueba = sin XP.');
+            return;
+        }
+        setShowEvidenceModal(false);
+        setCompleting(true);
+        playCrunch();
         await completeMission(mission.id, xpAmount, power);
         setIsCompleted(true);
         setIsActive(false);
         setCompleting(false);
+        setEvidenceText('');
     };
+
 
     const POWER_COLORS: Record<string, string> = {
         architect: '#3b82f6',
@@ -204,6 +215,63 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                     </div>
                 </div>
             </div>
+            {/* ANTI-CHEAT EVIDENCE MODAL */}
+            <AnimatePresence>
+                {showEvidenceModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-6"
+                        onClick={() => setShowEvidenceModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, rotate: -2 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0.9 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-[#f4f1eb] border-8 border-black p-8 max-w-lg w-full"
+                            style={{ boxShadow: '12px 12px 0 black' }}
+                        >
+                            <div className="flex items-center gap-3 mb-6">
+                                <Lock size={24} />
+                                <h3 className="text-2xl font-black uppercase" style={{ fontFamily: "'Space Mono', monospace" }}>
+                                    PROTOCOLO ANTI-CHEAT
+                                </h3>
+                            </div>
+                            <p className="font-bold text-sm mb-2 opacity-70 uppercase">
+                                TAREA: {mission.title}
+                            </p>
+                            <p className="font-bold text-sm mb-6 border-l-4 border-red-600 pl-3">
+                                Moltbot necesita prueba antes de otorgar +{xpAmount} XP.<br />
+                                Link, descripción de qué hiciste, commits, foto, lo que sea. Nada = no hay XP.
+                            </p>
+                            <textarea
+                                className="w-full border-4 border-black p-4 font-bold text-sm bg-white mb-6 resize-none focus:outline-none"
+                                rows={4}
+                                placeholder="¿Qué hiciste exactamente? Link o descripción concreta..."
+                                value={evidenceText}
+                                onChange={e => setEvidenceText(e.target.value)}
+                                autoFocus
+                            />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleSubmitEvidence}
+                                    className="flex-1 bg-black text-white py-4 font-black uppercase text-lg border-4 border-black hover:bg-red-600 transition-colors"
+                                >
+                                    ✓ ENVIAR PRUEBA (+{xpAmount} XP)
+                                </button>
+                                <button
+                                    onClick={() => setShowEvidenceModal(false)}
+                                    className="px-6 py-4 border-4 border-black font-black hover:bg-black hover:text-white transition-colors"
+                                >
+                                    X
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
