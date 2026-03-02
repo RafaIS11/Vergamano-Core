@@ -8,6 +8,7 @@ import NeuralLinkView from './components/vergamano/NeuralLinkView';
 import { InkSplatterSVG, ChaoticScribble, ScratchMarks } from './components/vergamano/ScribbleElements';
 import { FloAvatar } from './components/vergamano/FloAvatar';
 import { TheVoid } from './components/vergamano/effects/TheVoid';
+import QuickMissionsView from './components/vergamano/QuickMissionsView';
 import { motion } from 'framer-motion';
 
 // CANONICAL PILLARS — each has a real generated artwork image
@@ -21,6 +22,7 @@ const PILARS = [
 
 const MODULES = [
   { label: '⚔️ ARENA', value: 'arena' },
+  { label: '⚡ TAREAS', value: 'tasks' },
   { label: '🗺️ MAPA', value: 'map' },
   { label: '📡 NOTICIAS', value: 'lsd' },
   { label: '🛒 MERCADO', value: 'market' },
@@ -215,6 +217,7 @@ function App() {
           ) : (
             <>
               {activeModule === 'arena' && <ArenaView />}
+              {activeModule === 'tasks' && <QuickMissionsView />}
               {activeModule === 'map' && <MapView />}
               {activeModule === 'lsd' && <LSDFeed />}
               {activeModule === 'market' && <MarketView />}
