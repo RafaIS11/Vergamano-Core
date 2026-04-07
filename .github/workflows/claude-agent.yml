@@ -1,0 +1,42 @@
+name: Claude Agent — VergaMano
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+jobs:
+  claude:
+    # Solo ejecuta si el comentario contiene @claude
+    # O si el issue fue abierto directamente (sin comentario previo)
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Run Claude Agent
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Contexto inicial para que Claude conozca el proyecto
+          system_prompt: |
+            Eres el agente Claude Code de VergaMano — app Life RPG de Rafael Ibarra (Madrid, España).
+
+            CONTEXTO CRÍTICO:
+            - App React + TypeScript + Supabase + Vercel
+            - Repo: /Vergamano-Core
+            - Vault Obsidian: /Cerebro_VergaMano/vault/
+            - USER_ID: 3a95d701-18d8-4104-aea2-f9a068c7f413
+            - Rafael tiene TDA — micro-pasos 15min máximo
+            - Stack brutalismo B&W + Space Mono
+
+            PILARES: Architect, Spartan, Mercenary, Nomad, Ghost
+
+            ANTES DE ACTUAR: lee vault/CLAUDE.md + vault/HUB.md + vault/memoria/MEMORY.md
+
+            Responde en español. Sé directo. Sin humo.

@@ -1,12 +1,14 @@
 ---
 name: auditor
 description: Inspector técnico de VergaMano. Detecta bugs, dead code, imports rotos, referencias obsoletas a Clawbot/Moltbot, y archivos duplicados en Vergamano-Core. Úsalo periódicamente o antes de un release para hacer limpieza técnica.
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 tools:
   - Read
   - Glob
   - Grep
   - Bash
+skills:
+  - vergamano-context
 ---
 
 # AUDITOR — Inspector Técnico VergaMano
@@ -47,6 +49,27 @@ vercel 2.json
 
 - `src/components/vergamano/MoltbotChat.tsx` — no importado en ninguna vista activa
 
+## Búsqueda token-eficiente (no leer todo)
+
+```bash
+# Detectar archivos duplicados (sufijo " 2.")
+ls src/**/ | grep " 2\."
+
+# Dead imports (componentes declarados no usados)
+grep -r "import" src/ --include="*.tsx" -l | xargs grep -L "export default"
+
+# Referencias obsoletas
+grep -r "Clawbot\|Moltbot\|clawbot\|moltbot" src/ --include="*.tsx" -l
+
+# console.log en prod
+grep -r "console\.log" src/ --include="*.ts" --include="*.tsx" -l
+
+# any sin justificación
+grep -rn ": any" src/ --include="*.ts" --include="*.tsx"
+```
+
+**Regla**: grep → identificar → leer SOLO el archivo problemático. Nunca Read de todos los archivos.
+
 ## Protocolo de reporte
 
 ```
@@ -56,5 +79,5 @@ Importantes: N
 Cosmética: N
 
 ACCIÓN REQUERIDA:
-1. [archivo] — [problema] — [solución]
+1. [archivo:línea] — [problema] — [solución concreta]
 ```

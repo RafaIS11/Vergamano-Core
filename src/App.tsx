@@ -3,12 +3,9 @@ import { useGame } from './context/GameContext';
 import ArenaView from './components/vergamano/ArenaView';
 import MapView from './components/vergamano/MapView';
 import MarketView from './components/vergamano/MarketView';
-import { LSDFeed } from './components/vergamano/LSDFeed';
-import NeuralLinkView from './components/vergamano/NeuralLinkView';
 import { InkSplatterSVG, ChaoticScribble, ScratchMarks } from './components/vergamano/ScribbleElements';
 import { FloAvatar } from './components/vergamano/FloAvatar';
 import { TheVoid } from './components/vergamano/effects/TheVoid';
-import QuickMissionsView from './components/vergamano/QuickMissionsView';
 import { motion } from 'framer-motion';
 
 // CANONICAL PILLARS — each has a real generated artwork image
@@ -22,11 +19,8 @@ const PILARS = [
 
 const MODULES = [
   { label: '⚔️ ARENA', value: 'arena' },
-  { label: '⚡ TAREAS', value: 'tasks' },
   { label: '🗺️ MAPA', value: 'map' },
-  { label: '📡 NOTICIAS', value: 'lsd' },
   { label: '🛒 MERCADO', value: 'market' },
-  { label: '🧠 MOLTBOT', value: 'neural' },
 ];
 
 function App() {
@@ -217,18 +211,14 @@ function App() {
           ) : (
             <>
               {activeModule === 'arena' && <ArenaView />}
-              {activeModule === 'tasks' && <QuickMissionsView />}
               {activeModule === 'map' && <MapView />}
-              {activeModule === 'lsd' && <LSDFeed />}
               {activeModule === 'market' && <MarketView />}
-              {activeModule === 'neural' && <NeuralLinkView />}
             </>
           )}
         </main>
 
         <footer className="mt-12 pt-6 border-t-4 border-black flex justify-between items-center opacity-30">
           <p className="font-black text-xs uppercase tracking-widest">VERGAMANO_OS // V5.0</p>
-          <p className="font-black text-xs uppercase">MOLTBOT_GM_ACTIVO 🔥</p>
         </footer>
       </div>
     </div>

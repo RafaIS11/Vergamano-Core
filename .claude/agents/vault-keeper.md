@@ -1,7 +1,7 @@
 ---
 name: vault-keeper
 description: Guardián del vault Obsidian Cerebro_VergaMano. Crear, editar y reorganizar archivos .md del vault con frontmatter, wikilinks y callouts correctos. Úsalo para cualquier cambio en el vault de conocimiento.
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Write
@@ -11,6 +11,9 @@ tools:
   - Bash
 skills:
   - obsidian-markdown
+  - obsidian-bases
+  - obsidian-cli
+  - json-canvas
   - qmd
 ---
 
