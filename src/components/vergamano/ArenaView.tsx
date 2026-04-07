@@ -3,7 +3,6 @@ import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { ChaoticScribble } from './ScribbleElements';
 import { FloAvatar } from './FloAvatar';
-import { TaskCard } from './TaskCard';
 
 const ArenaView: React.FC = () => {
     const { profile, missions, activePillar } = useGame();
@@ -50,15 +49,9 @@ const ArenaView: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 max-h-[1000px] overflow-y-auto pr-4 scrollbar-hide">
-                    {filteredMissions.length > 0 ? (
-                        filteredMissions.map(mission => (
-                            <TaskCard key={mission.id} mission={mission} />
-                        ))
-                    ) : (
-                        <div className="p-32 border-8 border-dashed border-gray-100 text-center text-4xl font-black opacity-20">
-                            SIN_ACTIVIDAD_DETECTADA
-                        </div>
-                    )}
+                    <div className="p-32 border-8 border-dashed border-gray-100 text-center text-4xl font-black opacity-20">
+                        SIN_ACTIVIDAD_DETECTADA
+                    </div>
                 </div>
             </section>
         </div>
