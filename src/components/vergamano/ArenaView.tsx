@@ -64,8 +64,13 @@ const ArenaView: React.FC = () => {
                 </motion.div>
 
                 {/* Pillar XP Grid */}
-                <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    {pillars.map((p, i) => {
+                <motion.div
+                    className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-5 gap-3"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+                >
+                    {pillars.map((p) => {
                         const meta = PILLAR_META[p];
                         const xp = (profile as any)[`xp_${p}`] || 0;
                         const xpInLevel = xp % 500;
@@ -73,9 +78,8 @@ const ArenaView: React.FC = () => {
                         return (
                             <motion.button
                                 key={p}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
+                                variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+                                transition={{ duration: 0.25 }}
                                 whileHover={{ y: -3, boxShadow: '8px 8px 0 black' }}
                                 whileTap={{ y: 0 }}
                                 onClick={() => { setActivePillar(p); setActiveModule('tasks'); }}
@@ -101,7 +105,7 @@ const ArenaView: React.FC = () => {
                             </motion.button>
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
 
             {/* ── MISIONES ACTIVAS (preview 3) ── */}

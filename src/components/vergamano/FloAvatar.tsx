@@ -106,18 +106,18 @@ export const FloAvatar = ({ hp, totalXP, className = '', compact = false }: FloA
             {/* Avatar image */}
             <div
                 className="relative border-4 border-black overflow-hidden"
-                style={{ background: '#f4f1eb', aspectRatio: '3/4' }}
+                style={{ background: '#f4f1eb', aspectRatio: '2/3' }}
             >
                 <AnimatePresence mode="wait">
                     <motion.img
                         key={level.img}
                         src={level.img}
                         alt={level.label}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="w-full h-full object-contain object-bottom"
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
+                        className="w-full h-full object-cover object-top"
                         style={{ filter: level.filter }}
                     />
                 </AnimatePresence>

@@ -114,7 +114,14 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
     }
 
     return (
-        <div className="relative border-[8px] border-black bg-white hover:shadow-[12px_12px_0px_#000] transition-all duration-150">
+        <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            whileHover={{ y: -4, boxShadow: '12px 12px 0 black' }}
+            className="relative border-[8px] border-black bg-white"
+            style={{ boxShadow: '6px 6px 0 black' }}
+        >
             {/* Ink splatter decoración */}
             <div className="absolute -top-4 -right-4 w-10 h-10 pointer-events-none">
                 <InkSplatterSVG variant={1} />
@@ -204,14 +211,16 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                         </div>
 
                         {/* Completar */}
-                        <button
+                        <motion.button
                             onClick={handleComplete}
                             disabled={completing}
-                            className={`flex-1 py-4 font-black text-lg uppercase border-4 border-black transition-all
-                                ${completing ? 'opacity-50 cursor-wait' : 'bg-black text-white hover:bg-red-600 active:translate-y-1'}`}
+                            whileHover={!completing ? { scale: 1.02 } : {}}
+                            whileTap={!completing ? { scale: 0.97 } : {}}
+                            className={`flex-1 py-4 font-black text-lg uppercase border-4 border-black transition-colors
+                                ${completing ? 'opacity-50 cursor-wait' : 'bg-black text-white hover:bg-red-600'}`}
                         >
                             {completing ? 'PROCESANDO...' : `✓ MISIÓN COMPLETADA (+${xpAmount} XP)`}
-                        </button>
+                        </motion.button>
                     </div>
                 </div>
             </div>
@@ -272,6 +281,6 @@ export const TaskCard = ({ mission }: { mission: Mission }) => {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 };
