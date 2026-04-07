@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../context/GameContext';
 import { TaskCard } from './TaskCard';
@@ -15,6 +15,11 @@ const PILLARS = [
 const TasksView: React.FC = () => {
     const { missions, activePillar, setActivePillar } = useGame();
     const [filter, setFilter] = useState<string | null>(activePillar);
+
+    // Sync filter when navigating from ArenaView pillar click
+    useEffect(() => {
+        setFilter(activePillar);
+    }, [activePillar]);
 
     const filtered = filter
         ? missions.filter(m => m.power === filter || m.pilar === filter)
