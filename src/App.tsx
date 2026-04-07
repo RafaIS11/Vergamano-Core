@@ -3,6 +3,10 @@ import { useGame } from './context/GameContext';
 import ArenaView from './components/vergamano/ArenaView';
 import MapView from './components/vergamano/MapView';
 import MarketView from './components/vergamano/MarketView';
+import TasksView from './components/vergamano/TasksView';
+import LSDFeedView from './components/vergamano/LSDFeedView';
+import ChatView from './components/vergamano/ChatView';
+import { AnimatePresence } from 'framer-motion';
 import { InkSplatterSVG, ChaoticScribble, ScratchMarks } from './components/vergamano/ScribbleElements';
 import { FloAvatar } from './components/vergamano/FloAvatar';
 import { TheVoid } from './components/vergamano/effects/TheVoid';
@@ -19,6 +23,9 @@ const PILARS = [
 
 const MODULES = [
   { label: '⚔️ ARENA', value: 'arena' },
+  { label: '📋 TASKS', value: 'tasks' },
+  { label: '📡 LSD FEED', value: 'lsd' },
+  { label: '💬 CHAT', value: 'chat' },
   { label: '🗺️ MAPA', value: 'map' },
   { label: '🛒 MERCADO', value: 'market' },
 ];
@@ -198,7 +205,7 @@ function App() {
 
         {/* ===== MAIN MODULE ===== */}
         <main
-          className="border-[6px] border-black bg-white p-6 md:p-10 min-h-[70vh]"
+          className="border-[6px] border-black bg-white min-h-[70vh] overflow-hidden"
           style={{ boxShadow: '12px 12px 0 rgba(0,0,0,0.08)' }}
         >
           {isLoading ? (
@@ -209,11 +216,23 @@ function App() {
               </div>
             </div>
           ) : (
-            <>
-              {activeModule === 'arena' && <ArenaView />}
-              {activeModule === 'map' && <MapView />}
-              {activeModule === 'market' && <MarketView />}
-            </>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeModule}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+                className="p-6 md:p-10"
+              >
+                {activeModule === 'arena' && <ArenaView />}
+                {activeModule === 'tasks' && <TasksView />}
+                {activeModule === 'lsd' && <LSDFeedView />}
+                {activeModule === 'chat' && <ChatView />}
+                {activeModule === 'map' && <MapView />}
+                {activeModule === 'market' && <MarketView />}
+              </motion.div>
+            </AnimatePresence>
           )}
         </main>
 

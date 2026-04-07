@@ -3,7 +3,7 @@
 
 export type PilarType = 'architect' | 'spartan' | 'mercenary' | 'nomad' | 'ghost';
 export type MissionStatus = 'pending' | 'active' | 'auditing' | 'completed' | 'failed';
-export type ModuleType = 'arena' | 'tasks' | 'map' | 'lsd' | 'market' | 'neural';
+export type ModuleType = 'arena' | 'tasks' | 'lsd' | 'chat' | 'map' | 'market';
 export type CityStatus = 'conquered' | 'current' | 'locked';
 export type SenderType = 'rafael' | 'moltbot';
 
