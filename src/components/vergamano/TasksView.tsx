@@ -22,7 +22,10 @@ const TasksView: React.FC = () => {
     }, [activePillar]);
 
     const filtered = filter
-        ? missions.filter(m => m.power === filter || m.pilar === filter)
+        ? missions.filter(m =>
+            m.power?.toLowerCase() === filter ||
+            m.pilar?.toLowerCase() === filter
+          )
         : missions;
 
     const active = filtered.filter(m => m.status !== 'completed' && m.status !== 'failed');
